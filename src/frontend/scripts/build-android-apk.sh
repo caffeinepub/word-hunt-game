@@ -14,29 +14,37 @@ set -e
 #
 # Usage:
 #   ./build-android-apk.sh           # Build debug APK (default)
-#   ./build-android-apk.sh --release # Build release APK
+#   ./build-android-apk.sh --release # Build unsigned release APK
+#   ./build-android-apk.sh --release --signed # Build signed release APK
 #   BUILD_TYPE=release ./build-android-apk.sh  # Build release APK (env var)
 #
 # Output:
 # - Debug APK: frontend/android-apk-output/word-hunt-debug.apk
-# - Release APK: frontend/android-apk-output/word-hunt-release-unsigned.apk
+# - Unsigned Release APK: frontend/android-apk-output/word-hunt-release-unsigned.apk
+# - Signed Release APK: frontend/android-apk-output/word-hunt-release.apk
+# - Published Web Copy (immediate): frontend/dist/downloads/word-hunt-latest.apk
+# - Published Web Copy (future builds): frontend/public/downloads/word-hunt-latest.apk
 # ============================================================================
 
 # ============================================================================
 # Parse Arguments and Determine Build Type
 # ============================================================================
 BUILD_TYPE="debug"
+ENABLE_SIGNING=false
 
-# Check for --release flag
+# Check for flags
 for arg in "$@"; do
   if [ "$arg" = "--release" ]; then
     BUILD_TYPE="release"
+  elif [ "$arg" = "--signed" ]; then
+    ENABLE_SIGNING=true
   fi
 done
 
-# Check for BUILD_TYPE environment variable
-if [ -n "$BUILD_TYPE_ENV" ]; then
-  BUILD_TYPE="$BUILD_TYPE_ENV"
+# Check for BUILD_TYPE environment variable (allow override)
+if [ -n "${BUILD_TYPE:-}" ] && [ "$BUILD_TYPE" != "debug" ]; then
+  # BUILD_TYPE was set via environment, keep it
+  :
 fi
 
 # Normalize build type to lowercase
@@ -50,14 +58,28 @@ if [ "$BUILD_TYPE" != "debug" ] && [ "$BUILD_TYPE" != "release" ]; then
   echo ""
   echo "Usage:"
   echo "  ./build-android-apk.sh           # Build debug APK (default)"
-  echo "  ./build-android-apk.sh --release # Build release APK"
+  echo "  ./build-android-apk.sh --release # Build unsigned release APK"
+  echo "  ./build-android-apk.sh --release --signed # Build signed release APK"
   echo "  BUILD_TYPE=release ./build-android-apk.sh  # Build release APK (env var)"
+  echo ""
+  exit 1
+fi
+
+# Signing is only applicable to release builds
+if [ "$ENABLE_SIGNING" = true ] && [ "$BUILD_TYPE" != "release" ]; then
+  echo "❌ ERROR: --signed flag can only be used with release builds"
+  echo ""
+  echo "Usage:"
+  echo "  ./build-android-apk.sh --release --signed"
   echo ""
   exit 1
 fi
 
 echo "🚀 Starting Android APK build for Word Hunt Game..."
 echo "📦 Build type: $BUILD_TYPE"
+if [ "$ENABLE_SIGNING" = true ]; then
+  echo "🔐 Signing: enabled"
+fi
 echo ""
 
 # Determine script directory and project root
@@ -186,6 +208,135 @@ echo "✅ Gradle wrapper: $GRADLEW"
 echo ""
 
 # ============================================================================
+# Step 1.5: Validate Signing Configuration (if enabled)
+# ============================================================================
+if [ "$ENABLE_SIGNING" = true ]; then
+  echo "🔐 Validating signing configuration..."
+  
+  SIGNING_PROPS_FILE="$FRONTEND_DIR/android/signing.properties"
+  MISSING_INPUTS=()
+  
+  # Check for signing.properties file
+  if [ -f "$SIGNING_PROPS_FILE" ]; then
+    echo "✅ Found signing.properties file"
+    
+    # Source the properties file to check for required keys
+    # Note: We're just checking existence, not validating values
+    if ! grep -q "RELEASE_STORE_FILE" "$SIGNING_PROPS_FILE"; then
+      MISSING_INPUTS+=("RELEASE_STORE_FILE in signing.properties")
+    fi
+    if ! grep -q "RELEASE_STORE_PASSWORD" "$SIGNING_PROPS_FILE"; then
+      MISSING_INPUTS+=("RELEASE_STORE_PASSWORD in signing.properties")
+    fi
+    if ! grep -q "RELEASE_KEY_ALIAS" "$SIGNING_PROPS_FILE"; then
+      MISSING_INPUTS+=("RELEASE_KEY_ALIAS in signing.properties")
+    fi
+    if ! grep -q "RELEASE_KEY_PASSWORD" "$SIGNING_PROPS_FILE"; then
+      MISSING_INPUTS+=("RELEASE_KEY_PASSWORD in signing.properties")
+    fi
+  else
+    # Check for environment variables as fallback
+    if [ -z "$RELEASE_STORE_FILE" ]; then
+      MISSING_INPUTS+=("RELEASE_STORE_FILE environment variable or signing.properties file")
+    fi
+    if [ -z "$RELEASE_STORE_PASSWORD" ]; then
+      MISSING_INPUTS+=("RELEASE_STORE_PASSWORD environment variable")
+    fi
+    if [ -z "$RELEASE_KEY_ALIAS" ]; then
+      MISSING_INPUTS+=("RELEASE_KEY_ALIAS environment variable")
+    fi
+    if [ -z "$RELEASE_KEY_PASSWORD" ]; then
+      MISSING_INPUTS+=("RELEASE_KEY_PASSWORD environment variable")
+    fi
+  fi
+  
+  # If any required inputs are missing, fail with clear instructions
+  if [ ${#MISSING_INPUTS[@]} -gt 0 ]; then
+    echo ""
+    echo "❌ ERROR: Signing is enabled but required signing configuration is missing."
+    echo ""
+    echo "Missing inputs:"
+    for input in "${MISSING_INPUTS[@]}"; do
+      echo "  - $input"
+    done
+    echo ""
+    echo "To sign your release APK, you must provide:"
+    echo "  1. RELEASE_STORE_FILE - Path to your keystore file (.jks or .keystore)"
+    echo "  2. RELEASE_STORE_PASSWORD - Password for the keystore"
+    echo "  3. RELEASE_KEY_ALIAS - Alias of the key in the keystore"
+    echo "  4. RELEASE_KEY_PASSWORD - Password for the key"
+    echo ""
+    echo "You can provide these in two ways:"
+    echo ""
+    echo "Option 1: Create a signing.properties file (recommended)"
+    echo "  1. Copy the example file:"
+    echo "     cp frontend/android/signing.properties.example frontend/android/signing.properties"
+    echo "  2. Edit frontend/android/signing.properties with your actual values"
+    echo "  3. This file is git-ignored and will not be committed"
+    echo ""
+    echo "Option 2: Set environment variables"
+    echo "  export RELEASE_STORE_FILE=/path/to/your/keystore.jks"
+    echo "  export RELEASE_STORE_PASSWORD=your_keystore_password"
+    echo "  export RELEASE_KEY_ALIAS=your_key_alias"
+    echo "  export RELEASE_KEY_PASSWORD=your_key_password"
+    echo ""
+    echo "If you don't have a keystore yet, generate one with:"
+    echo "  keytool -genkey -v -keystore my-release-key.jks -keyalg RSA \\"
+    echo "    -keysize 2048 -validity 10000 -alias my-key-alias"
+    echo ""
+    echo "For detailed instructions, see: frontend/ANDROID_APK.md"
+    echo ""
+    exit 1
+  fi
+  
+  # Validate keystore file exists (if using signing.properties)
+  if [ -f "$SIGNING_PROPS_FILE" ]; then
+    KEYSTORE_PATH=$(grep "RELEASE_STORE_FILE" "$SIGNING_PROPS_FILE" | cut -d'=' -f2)
+    # Remove any surrounding quotes and whitespace
+    KEYSTORE_PATH=$(echo "$KEYSTORE_PATH" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^"//' -e 's/"$//')
+    
+    # Handle relative paths (relative to android directory)
+    if [[ ! "$KEYSTORE_PATH" = /* ]]; then
+      KEYSTORE_PATH="$FRONTEND_DIR/android/$KEYSTORE_PATH"
+    fi
+    
+    if [ ! -f "$KEYSTORE_PATH" ]; then
+      echo ""
+      echo "❌ ERROR: Keystore file not found at: $KEYSTORE_PATH"
+      echo ""
+      echo "The signing.properties file specifies a keystore path, but the file does not exist."
+      echo "Please ensure:"
+      echo "  1. The RELEASE_STORE_FILE path in signing.properties is correct"
+      echo "  2. The keystore file exists at the specified location"
+      echo "  3. You have read permissions for the keystore file"
+      echo ""
+      echo "If you need to generate a new keystore, run:"
+      echo "  keytool -genkey -v -keystore my-release-key.jks -keyalg RSA \\"
+      echo "    -keysize 2048 -validity 10000 -alias my-key-alias"
+      echo ""
+      exit 1
+    fi
+    
+    echo "✅ Keystore file found: $KEYSTORE_PATH"
+  elif [ -n "$RELEASE_STORE_FILE" ]; then
+    # Validate keystore from environment variable
+    if [ ! -f "$RELEASE_STORE_FILE" ]; then
+      echo ""
+      echo "❌ ERROR: Keystore file not found at: $RELEASE_STORE_FILE"
+      echo ""
+      echo "The RELEASE_STORE_FILE environment variable points to a file that does not exist."
+      echo "Please ensure the path is correct and the file exists."
+      echo ""
+      exit 1
+    fi
+    echo "✅ Keystore file found: $RELEASE_STORE_FILE"
+  fi
+  
+  echo "✅ Signing configuration validated"
+  echo ""
+fi
+
+# ============================================================================
 # Step 2: Build Web App
 # ============================================================================
 echo "🔨 Building web app..."
@@ -228,7 +379,13 @@ cd "$FRONTEND_DIR/android"
 # Determine Gradle task based on build type
 if [ "$BUILD_TYPE" = "release" ]; then
   GRADLE_TASK="assembleRelease"
-  echo "Building release APK..."
+  if [ "$ENABLE_SIGNING" = true ]; then
+    echo "Building signed release APK..."
+    # Set environment variable to enable signing in Gradle
+    export ENABLE_RELEASE_SIGNING=true
+  else
+    echo "Building unsigned release APK..."
+  fi
 else
   GRADLE_TASK="assembleDebug"
   echo "Building debug APK..."
@@ -251,29 +408,55 @@ OUTPUT_DIR="$FRONTEND_DIR/android-apk-output"
 mkdir -p "$OUTPUT_DIR"
 
 if [ "$BUILD_TYPE" = "release" ]; then
-  # Release APK paths
-  GRADLE_APK="$FRONTEND_DIR/android/app/build/outputs/apk/release/app-release-unsigned.apk"
-  OUTPUT_APK="$OUTPUT_DIR/word-hunt-release-unsigned.apk"
-  
-  # Verify the release APK exists
-  if [ ! -f "$GRADLE_APK" ]; then
-    echo ""
-    echo "❌ ERROR: Release APK not found after Gradle build."
-    echo ""
-    echo "Expected location: $GRADLE_APK"
-    echo ""
-    echo "The Gradle build completed but did not produce the expected APK file."
-    echo "This may indicate a build configuration issue or Gradle task failure."
-    echo ""
-    echo "Please check the Gradle output above for errors and ensure:"
-    echo "  - The assembleRelease task completed successfully"
-    echo "  - No build errors occurred during compilation"
-    echo "  - The Android project configuration is correct"
-    echo ""
-    echo "Note: Release builds produce unsigned APKs by default."
-    echo "For signed APKs, configure signing in android/app/build.gradle"
-    echo ""
-    exit 1
+  if [ "$ENABLE_SIGNING" = true ]; then
+    # Signed release APK paths
+    GRADLE_APK="$FRONTEND_DIR/android/app/build/outputs/apk/release/app-release.apk"
+    OUTPUT_APK="$OUTPUT_DIR/word-hunt-release.apk"
+    
+    # Verify the signed release APK exists
+    if [ ! -f "$GRADLE_APK" ]; then
+      echo ""
+      echo "❌ ERROR: Signed release APK not found after Gradle build."
+      echo ""
+      echo "Expected location: $GRADLE_APK"
+      echo ""
+      echo "The Gradle build completed but did not produce a signed APK."
+      echo "This may indicate:"
+      echo "  1. Signing configuration was not properly applied"
+      echo "  2. Keystore credentials are incorrect"
+      echo "  3. Build errors occurred during signing"
+      echo ""
+      echo "Please check the Gradle output above for signing errors."
+      echo "Verify your signing configuration in:"
+      echo "  - frontend/android/signing.properties (if using properties file)"
+      echo "  - Environment variables (if using env vars)"
+      echo ""
+      exit 1
+    fi
+  else
+    # Unsigned release APK paths
+    GRADLE_APK="$FRONTEND_DIR/android/app/build/outputs/apk/release/app-release-unsigned.apk"
+    OUTPUT_APK="$OUTPUT_DIR/word-hunt-release-unsigned.apk"
+    
+    # Verify the unsigned release APK exists
+    if [ ! -f "$GRADLE_APK" ]; then
+      echo ""
+      echo "❌ ERROR: Unsigned release APK not found after Gradle build."
+      echo ""
+      echo "Expected location: $GRADLE_APK"
+      echo ""
+      echo "The Gradle build completed but did not produce the expected APK file."
+      echo "This may indicate a build configuration issue or Gradle task failure."
+      echo ""
+      echo "Please check the Gradle output above for errors and ensure:"
+      echo "  - The assembleRelease task completed successfully"
+      echo "  - No build errors occurred during compilation"
+      echo "  - The Android project configuration is correct"
+      echo ""
+      echo "Note: To build a signed release APK, use: ./build-android-apk.sh --release --signed"
+      echo ""
+      exit 1
+    fi
   fi
 else
   # Debug APK paths
@@ -316,53 +499,99 @@ echo "✅ APK copied to deterministic output directory"
 echo ""
 
 # ============================================================================
-# Step 6: Display Output Paths
+# Step 6: Publish APK to Web Download Directories
 # ============================================================================
-echo "📦 APK Output Locations:"
-echo ""
+echo "🌐 Publishing APK to web download directories..."
 
-# Show Gradle output location
-if [ -f "$GRADLE_APK" ]; then
-  APK_SIZE=$(du -h "$GRADLE_APK" | cut -f1)
-  if [ "$BUILD_TYPE" = "release" ]; then
-    echo "  ✅ Gradle Release APK ($APK_SIZE):"
-  else
-    echo "  ✅ Gradle Debug APK ($APK_SIZE):"
-  fi
-  echo "     $GRADLE_APK"
+# Ensure the dist downloads directory exists
+DIST_DOWNLOADS_DIR="$FRONTEND_DIR/dist/downloads"
+mkdir -p "$DIST_DOWNLOADS_DIR"
+
+if [ ! -d "$DIST_DOWNLOADS_DIR" ]; then
   echo ""
+  echo "❌ ERROR: Failed to create dist downloads directory."
+  echo ""
+  echo "Target: $DIST_DOWNLOADS_DIR"
+  echo ""
+  exit 1
 fi
 
-# Show deterministic output location
-if [ -f "$OUTPUT_APK" ]; then
-  APK_SIZE=$(du -h "$OUTPUT_APK" | cut -f1)
-  if [ "$BUILD_TYPE" = "release" ]; then
-    echo "  ✅ Deterministic Release APK ($APK_SIZE):"
-  else
-    echo "  ✅ Deterministic Debug APK ($APK_SIZE):"
-  fi
-  echo "     $OUTPUT_APK"
+# Ensure the public downloads directory exists
+PUBLIC_DOWNLOADS_DIR="$FRONTEND_DIR/public/downloads"
+mkdir -p "$PUBLIC_DOWNLOADS_DIR"
+
+if [ ! -d "$PUBLIC_DOWNLOADS_DIR" ]; then
   echo ""
+  echo "❌ ERROR: Failed to create public downloads directory."
+  echo ""
+  echo "Target: $PUBLIC_DOWNLOADS_DIR"
+  echo ""
+  exit 1
 fi
 
-echo "🎉 Build complete! You can now install the APK on your Android device."
+# Define the published APK name
+PUBLISHED_APK_NAME="word-hunt-latest.apk"
+DIST_PUBLISHED_APK="$DIST_DOWNLOADS_DIR/$PUBLISHED_APK_NAME"
+PUBLIC_PUBLISHED_APK="$PUBLIC_DOWNLOADS_DIR/$PUBLISHED_APK_NAME"
+
+# Copy to dist/downloads (for immediate deployment)
+echo "📋 Publishing to dist/downloads (immediate deployment)..."
+cp "$OUTPUT_APK" "$DIST_PUBLISHED_APK"
+
+if [ ! -f "$DIST_PUBLISHED_APK" ]; then
+  echo ""
+  echo "❌ ERROR: Failed to publish APK to dist downloads directory."
+  echo ""
+  echo "Source: $OUTPUT_APK"
+  echo "Target: $DIST_PUBLISHED_APK"
+  echo ""
+  echo "This APK is required for the deployed web app to serve at /downloads/word-hunt-latest.apk"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Published to: $DIST_PUBLISHED_APK"
+
+# Copy to public/downloads (for future web builds)
+echo "📋 Publishing to public/downloads (future web builds)..."
+cp "$OUTPUT_APK" "$PUBLIC_PUBLISHED_APK"
+
+if [ ! -f "$PUBLIC_PUBLISHED_APK" ]; then
+  echo ""
+  echo "❌ ERROR: Failed to publish APK to public downloads directory."
+  echo ""
+  echo "Source: $OUTPUT_APK"
+  echo "Target: $PUBLIC_PUBLISHED_APK"
+  echo ""
+  echo "This APK is required for future web builds to include the latest APK."
+  echo ""
+  exit 1
+fi
+
+echo "✅ Published to: $PUBLIC_PUBLISHED_APK"
 echo ""
-echo "📍 Deterministic APK path:"
+
+# ============================================================================
+# Success Summary
+# ============================================================================
+echo "🎉 Build and publish completed successfully!"
+echo ""
+echo "📍 Deterministic APK output:"
 echo "   $OUTPUT_APK"
 echo ""
-
-if [ "$BUILD_TYPE" = "release" ]; then
-  echo "⚠️  Note: This is an unsigned release APK."
-  echo "   For production distribution, you should sign the APK with your release key."
-  echo "   See frontend/ANDROID_APK.md for signing instructions."
-  echo ""
-fi
-
-echo "To install:"
-echo "  1. Transfer the APK to your Android device"
-echo "  2. Enable 'Install from Unknown Sources' in device settings"
-echo "  3. Open the APK file to install"
+echo "🌐 Published web downloads:"
+echo "   Immediate deployment: $DIST_PUBLISHED_APK"
+echo "   Future web builds:    $PUBLIC_PUBLISHED_APK"
 echo ""
-echo "Or use ADB:"
-echo "  adb install \"$OUTPUT_APK\""
+echo "📱 Runtime download URL: /downloads/word-hunt-latest.apk"
+echo ""
+echo "Next steps:"
+echo "  1. Deploy the updated frontend/dist directory to your web host"
+echo "  2. The APK will be available at: https://your-domain.com/downloads/word-hunt-latest.apk"
+echo "  3. The in-app Download APK button will automatically appear when the APK is detected"
+echo ""
+echo "To install the APK on an Android device:"
+echo "  1. Enable 'Install from Unknown Sources' in Android settings"
+echo "  2. Download the APK from the web app or transfer it directly"
+echo "  3. Open the APK file to install"
 echo ""

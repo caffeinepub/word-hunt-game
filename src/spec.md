@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Make it easy to generate a production-ready Android release APK artifact from a single script command with deterministic output naming.
+**Goal:** Package the current deployed draft into a fresh Android APK and publish it so it’s downloadable from the deployed web app at `/downloads/word-hunt-latest.apk`.
 
 **Planned changes:**
-- Update `frontend/scripts/build-android-apk.sh` to support an explicit release build option (in addition to debug), invoking the appropriate Gradle release task.
-- Copy the produced debug and/or release APK into `frontend/android-apk-output/` with deterministic, clearly named filenames.
-- Add clear failure handling when the expected release APK is not produced, including printing the expected path(s).
-- Ensure the script prints the final deterministic output path(s) at the end of the run for both debug and release builds.
-- Update `frontend/ANDROID_APK.md` with copy/paste-ready instructions for building the release APK via the one-command script, including the deterministic output path(s), while retaining debug instructions and Gradle output locations for reference.
+- Run and rely on the existing one-command build script (`frontend/scripts/build-android-apk.sh`) to produce a new APK artifact under `frontend/android-apk-output/`.
+- Copy/publish the latest built APK to `frontend/dist/downloads/word-hunt-latest.apk` for deployment output.
+- Also copy/publish the latest built APK to `frontend/public/downloads/word-hunt-latest.apk` so future web builds include it.
+- Ensure the app’s existing header download control (“Download APK” / “APK”) becomes visible by making the runtime APK availability check succeed via the published file at the required path.
 
-**User-visible outcome:** A developer can run one command to build either a debug or release Android APK and find the resulting artifact(s) in `frontend/android-apk-output/` under stable, predictable filenames, with documented commands and output paths.
+**User-visible outcome:** Users can download the latest Android APK from the site at `/downloads/word-hunt-latest.apk`, and the in-app header shows an English-labeled download control.

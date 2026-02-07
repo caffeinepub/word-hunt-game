@@ -2,9 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-to-support-building-a-release-apk-in-addition-to-debug-and-to-copy-the-resulting-apk-into-frontend-android-apk-output-with-a-deterministic-clearly-named-filename",
-      "featureTitle": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to support building a release APK (in addition to debug) and to copy the resulting APK into `frontend/android-apk-output/` with a deterministic, clearly named filename.",
+      "featureId": "feature-generate-a-fresh-android-apk-for-the-current-deployed-draft-using-the-repository-s-existing-one-command-build-script-and-ensure-the-resulting-apk-is-published-so-the-deployed-web-app-serves-it-at-downloads-word-hunt-latest-apk",
+      "featureTitle": "Generate a fresh Android APK for the current deployed draft using the repository’s existing one-command build script, and ensure the resulting APK is published so the deployed web app serves it at `/downloads/word-hunt-latest.apk`.",
       "files": [
+        "frontend/public/downloads/.gitkeep",
         "frontend/scripts/build-android-apk.sh"
       ],
       "components": [
@@ -17,27 +18,7 @@
         "user-approval@3.0.0"
       ],
       "testIds": [
-        "REQ-29"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-frontend-android-apk-md-to-document-how-to-produce-the-final-release-apk-using-the-repository-s-one-command-build-script-including-the-exact-command-s-and-the-deterministic-output-path-s-under-frontend-android-apk-output",
-      "featureTitle": "Update `frontend/ANDROID_APK.md` to document how to produce the final (release) APK using the repository’s one-command build script, including the exact command(s) and the deterministic output path(s) under `frontend/android-apk-output/`.",
-      "files": [
-        "frontend/ANDROID_APK.md"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "user-approval@3.0.0"
-      ],
-      "testIds": [
-        "REQ-30"
+        "REQ-40"
       ],
       "confidence": "high"
     }

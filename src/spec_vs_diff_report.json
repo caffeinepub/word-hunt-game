@@ -1,47 +1,82 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T07:14:50.528Z",
-  "summary": "REQ-30 appears implemented (ANDROID_APK.md documents release build command and deterministic output paths). REQ-29 is partially evidenced (script adds a --release flag and deterministic output filenames), but some acceptance-criteria behaviors are not verifiable from the truncated diff, and one environment-variable mechanism appears incorrect based on the shown code.",
+  "generatedAt": "2026-02-07T08:04:37.571Z",
+  "summary": "REQ-40 APK packaging/publishing work is partially evidenced by changes to the one-command build script and addition of a downloads directory placeholder, plus UI work to surface an APK download control. However, the diff also includes many unrelated gameplay/PWA/theme changes that were not requested and violate the stated non-goals/constraints. Due to truncation, some REQ-40 acceptance criteria cannot be conclusively verified from the diff summary alone (e.g., the exact publishing/copy behavior and exact URL used at runtime).",
   "missing_requirements": [
     {
-      "id": "REQ-29",
-      "requirement": "Support building a release APK via an explicit release option (environment variable or CLI flag).",
-      "reason": "The script documents and checks an env-var option, but the code checks `BUILD_TYPE_ENV` rather than the documented `BUILD_TYPE`, so the environment-variable release option as described in the script header likely will not work as intended.",
+      "id": "REQ-40",
+      "requirement": "Ensure the resulting APK is published so the deployed web app serves it at the exact path `/downloads/word-hunt-latest.apk` (including runtime availability check succeeding).",
+      "reason": "The diff summary mentions a header download button and a probe, but does not show the exact URL string used or confirm it is exactly `/downloads/word-hunt-latest.apk` (content is truncated / described at a high level).",
       "evidence": [
-        "frontend/scripts/build-android-apk.sh (truncated): header shows `BUILD_TYPE=release ./build-android-apk.sh`, but code uses `if [ -n \"$BUILD_TYPE_ENV\" ]; then ...`"
+        "frontend-file-summaries.txt (entry for frontend/src/components/game/WordHuntScreen.tsx is descriptive only; actual code/URL not shown)"
       ]
     },
     {
-      "id": "REQ-29",
-      "requirement": "If the expected release APK file is not produced, the script fails with a clear English error message that prints the expected path(s).",
-      "reason": "The diff excerpt does not show any logic that checks for the expected release APK output file(s) and prints the expected path(s) on failure (content is truncated before any such section).",
+      "id": "REQ-40",
+      "requirement": "After the build completes, publish a copy at `frontend/dist/downloads/word-hunt-latest.apk` and at `frontend/public/downloads/word-hunt-latest.apk`.",
+      "reason": "The build script comments/documentation state these outputs, and a `frontend/public/downloads/.gitkeep` is present, but the diff summary does not provide non-comment evidence (e.g., the relevant copy commands or resulting files) because the script content is truncated and no output artifact paths are shown being written.",
       "evidence": [
-        "frontend/scripts/build-android-apk.sh (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-29",
-      "requirement": "At the end of the script run (debug or release), print the final deterministic output path(s) for the generated APK artifact(s).",
-      "reason": "The diff excerpt does not include the end-of-script behavior, so it’s not evidenced that the script prints the final deterministic output path(s) after building/copying.",
-      "evidence": [
-        "frontend/scripts/build-android-apk.sh (truncated)"
+        "frontend/scripts/build-android-apk.sh (truncated; only header/comments shown about outputs)",
+        "frontend/public/downloads/.gitkeep"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Documentation adds an additional, alternative Android packaging approach (Trusted Web Activity (TWA) via Bubblewrap) beyond the requested one-command Capacitor/Gradle APK build documentation.",
-      "reason": "BuildRequest only asks to document producing a final release APK using the repository’s one-command build script and to keep referencing Gradle output locations. Introducing a separate Bubblewrap/TWA approach is not requested.",
+      "description": "Gameplay changes: fixed 15x15 grid size, new/changed countdown timer behavior, time-up warning messaging, separate next-game time limit state, and prevention of selections when time is up.",
+      "reason": "BuildRequest is strictly about generating/publishing an Android APK and making an APK download control visible; it explicitly lists non-goals as new gameplay features or redesign unrelated to APK packaging.",
       "evidence": [
-        "frontend/ANDROID_APK.md: \"two different approaches: Trusted Web Activity (TWA) via Bubblewrap, or Capacitor\"; section \"Approach 1: Bubblewrap TWA\" referenced in ToC"
+        "frontend-file-summaries.txt (entries for frontend/src/hooks/useWordHuntGame.ts and frontend/src/components/game/WordHuntScreen.tsx and frontend/src/components/game/GameControls.tsx)"
+      ]
+    },
+    {
+      "description": "Puzzle/word-hunt logic changes: new/changed word list, generator placement logic details, selection utilities changes.",
+      "reason": "Not requested by REQ-40 and falls under non-goals (new gameplay features/changes unrelated to APK packaging).",
+      "evidence": [
+        "frontend-file-summaries.txt (entries for frontend/src/lib/wordhunt/words.ts, frontend/src/lib/wordhunt/generator.ts, frontend/src/lib/wordhunt/selection.ts)"
+      ]
+    },
+    {
+      "description": "UI redesign/theme changes across multiple components (letter grid styling, word list badges, global styles, Tailwind config changes).",
+      "reason": "Not requested; REQ-40 focuses on APK packaging/publishing and a visible download control, and the non-goals disallow unrelated UI redesign.",
+      "evidence": [
+        "frontend-file-summaries.txt (entries for frontend/src/components/game/LetterGrid.tsx, frontend/src/components/game/WordList.tsx, frontend/src/index.css, frontend/tailwind.config.js)"
+      ]
+    },
+    {
+      "description": "New/expanded PWA metadata and manifest changes (installability metadata, manifest.webmanifest).",
+      "reason": "Not requested by REQ-40 and constitutes additional product work beyond APK packaging/publishing.",
+      "evidence": [
+        "frontend-file-summaries.txt (entries for frontend/index.html, frontend/public/manifest.webmanifest)"
+      ]
+    },
+    {
+      "description": "Added difficulty selector and duration parsing/clamping utilities.",
+      "reason": "Not requested by REQ-40; these are new gameplay/configuration features unrelated to APK packaging/publishing.",
+      "evidence": [
+        "frontend-file-summaries.txt (entries for frontend/src/components/game/DifficultySelector.tsx, frontend/src/lib/wordhunt/duration.ts)"
+      ]
+    },
+    {
+      "description": "Capacitor configuration changes (app ID/name/etc.).",
+      "reason": "Not requested by REQ-40 (which only constrains using the existing Capacitor+Gradle project); the diff summary indicates modifications without showing they are necessary for publishing the APK at the required URL.",
+      "evidence": [
+        "frontend-file-summaries.txt (entry for frontend/capacitor.config.ts)"
+      ]
+    },
+    {
+      "description": "Added extensive Android APK build documentation (ANDROID_APK.md).",
+      "reason": "Documentation was not requested as part of REQ-40; while potentially helpful, it is additional scope beyond generating/publishing the APK.",
+      "evidence": [
+        "frontend-file-summaries.txt (entry for frontend/ANDROID_APK.md)"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/ANDROID_APK.md",
+    "frontend/public/downloads/.gitkeep",
     "frontend/scripts/build-android-apk.sh",
     "project_state.json"
   ]

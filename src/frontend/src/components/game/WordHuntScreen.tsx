@@ -1,16 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWordHuntGame } from '../../hooks/useWordHuntGame';
 import { LetterGrid } from './LetterGrid';
 import { WordList } from './WordList';
 import { GameControls } from './GameControls';
-import { Trophy, Clock, AlertCircle } from 'lucide-react';
+import { Trophy, Clock, AlertCircle, Download } from 'lucide-react';
 import { formatTime } from '../../lib/wordhunt/time';
 import { getDefaultDuration, secondsToDuration, validateDuration } from '../../lib/wordhunt/duration';
+import { Button } from '../ui/button';
 
 const GRID_SIZE = 15;
 
 export function WordHuntScreen() {
   const [logoError, setLogoError] = useState(false);
+  const [apkAvailable, setApkAvailable] = useState<boolean | null>(null);
   const game = useWordHuntGame(GRID_SIZE);
   
   // State for the next game's time limit (doesn't affect current game)
@@ -18,6 +20,39 @@ export function WordHuntScreen() {
     const defaultDuration = getDefaultDuration();
     return secondsToDuration(defaultDuration);
   });
+
+  // Check if APK is available with robust fallback
+  useEffect(() => {
+    const checkApkAvailability = async () => {
+      try {
+        // Try HEAD request first (preferred for checking existence)
+        const headResponse = await fetch('/downloads/word-hunt-latest.apk', { 
+          method: 'HEAD',
+          cache: 'no-cache'
+        });
+        
+        if (headResponse.ok) {
+          setApkAvailable(true);
+          return;
+        }
+        
+        // Some static hosts don't support HEAD, try lightweight GET with range
+        const getResponse = await fetch('/downloads/word-hunt-latest.apk', {
+          method: 'GET',
+          headers: { 'Range': 'bytes=0-0' },
+          cache: 'no-cache'
+        });
+        
+        // Accept 200 (full response) or 206 (partial content)
+        setApkAvailable(getResponse.ok || getResponse.status === 206);
+      } catch (error) {
+        // Network error or file not found
+        setApkAvailable(false);
+      }
+    };
+    
+    checkApkAvailability();
+  }, []);
 
   const handleNewGame = () => {
     const validatedSeconds = validateDuration(nextGameDuration.minutes, nextGameDuration.seconds);
@@ -28,28 +63,54 @@ export function WordHuntScreen() {
     setNextGameDuration({ minutes, seconds });
   };
 
+  const handleDownloadApk = () => {
+    window.location.href = '/downloads/word-hunt-latest.apk';
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-3 md:gap-4">
-            {!logoError && (
-              <img
-                src="/assets/teacher.png"
-                alt="Word Hunt Logo"
-                className="w-12 h-12 md:w-16 md:h-16 object-contain flex-shrink-0"
-                onError={() => setLogoError(true)}
-              />
-            )}
-            <div className="flex flex-col">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                Word Hunt Game
-              </h1>
-              <p className="text-sm md:text-base text-blue-50 mt-1">
-                Find all the automotive parts!
-              </p>
+          <div className="flex items-center justify-between gap-3 md:gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
+              {!logoError && (
+                <img
+                  src="/assets/teacher.png"
+                  alt="Word Hunt Logo"
+                  className="w-12 h-12 md:w-16 md:h-16 object-contain flex-shrink-0"
+                  onError={() => setLogoError(true)}
+                />
+              )}
+              <div className="flex flex-col">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                  Word Hunt Game
+                </h1>
+                <p className="text-sm md:text-base text-blue-50 mt-1">
+                  Find all the automotive parts!
+                </p>
+              </div>
             </div>
+            
+            {/* Download APK Button */}
+            {apkAvailable === true && (
+              <Button
+                onClick={handleDownloadApk}
+                variant="outline"
+                size="sm"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 flex items-center gap-2 flex-shrink-0"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Download APK</span>
+                <span className="sm:hidden">APK</span>
+              </Button>
+            )}
+            
+            {apkAvailable === false && (
+              <div className="text-xs text-blue-100 hidden md:block">
+                APK not available
+              </div>
+            )}
           </div>
         </div>
       </header>

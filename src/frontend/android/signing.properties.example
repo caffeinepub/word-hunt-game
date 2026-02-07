@@ -1,0 +1,32 @@
+# Android Release Signing Configuration
+# =====================================
+# This file contains the configuration needed to sign your Android release APK.
+# 
+# IMPORTANT: This is an EXAMPLE file. Do NOT commit actual credentials to version control.
+#
+# To use this file:
+# 1. Copy this file to 'signing.properties' (without .example)
+#    cp signing.properties.example signing.properties
+# 2. Replace the placeholder values below with your actual keystore information
+# 3. The signing.properties file is git-ignored and will not be committed
+#
+# If you don't have a keystore yet, generate one with:
+#   keytool -genkey -v -keystore my-release-key.jks -keyalg RSA \
+#     -keysize 2048 -validity 10000 -alias my-key-alias
+#
+# For more information, see: frontend/ANDROID_APK.md
+
+# Path to your keystore file (.jks or .keystore)
+# Can be absolute or relative to the android/ directory
+# Example: RELEASE_STORE_FILE=../my-release-key.jks
+# Example: RELEASE_STORE_FILE=/home/user/keystores/my-release-key.jks
+RELEASE_STORE_FILE=path/to/your/keystore.jks
+
+# Password for the keystore
+RELEASE_STORE_PASSWORD=your_keystore_password
+
+# Alias of the key in the keystore
+RELEASE_KEY_ALIAS=your_key_alias
+
+# Password for the key
+RELEASE_KEY_PASSWORD=your_key_password

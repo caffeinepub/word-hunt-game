@@ -16,10 +16,84 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    
+    // Load signing configuration from signing.properties file or environment variables
+    // This allows signing without committing secrets to version control
+    signingConfigs {
+        release {
+            // Try to load from signing.properties file first
+            def signingPropsFile = file('signing.properties')
+            def canSign = false
+            
+            if (signingPropsFile.exists()) {
+                def signingProps = new Properties()
+                signingProps.load(new FileInputStream(signingPropsFile))
+                
+                if (signingProps['RELEASE_STORE_FILE'] && 
+                    signingProps['RELEASE_STORE_PASSWORD'] && 
+                    signingProps['RELEASE_KEY_ALIAS'] && 
+                    signingProps['RELEASE_KEY_PASSWORD']) {
+                    
+                    def storeFilePath = signingProps['RELEASE_STORE_FILE']
+                    def storeFileObj = file(storeFilePath)
+                    
+                    if (storeFileObj.exists()) {
+                        storeFile storeFileObj
+                        storePassword signingProps['RELEASE_STORE_PASSWORD']
+                        keyAlias signingProps['RELEASE_KEY_ALIAS']
+                        keyPassword signingProps['RELEASE_KEY_PASSWORD']
+                        canSign = true
+                        println "✅ Loaded signing configuration from signing.properties"
+                    } else {
+                        println "⚠️  Keystore file not found: ${storeFilePath}"
+                    }
+                }
+            } 
+            // Fallback to environment variables
+            else if (System.getenv('RELEASE_STORE_FILE') && 
+                     System.getenv('RELEASE_STORE_PASSWORD') && 
+                     System.getenv('RELEASE_KEY_ALIAS') && 
+                     System.getenv('RELEASE_KEY_PASSWORD')) {
+                
+                def storeFileObj = file(System.getenv('RELEASE_STORE_FILE'))
+                
+                if (storeFileObj.exists()) {
+                    storeFile storeFileObj
+                    storePassword System.getenv('RELEASE_STORE_PASSWORD')
+                    keyAlias System.getenv('RELEASE_KEY_ALIAS')
+                    keyPassword System.getenv('RELEASE_KEY_PASSWORD')
+                    canSign = true
+                    println "✅ Loaded signing configuration from environment variables"
+                } else {
+                    println "⚠️  Keystore file not found: ${System.getenv('RELEASE_STORE_FILE')}"
+                }
+            }
+            
+            if (!canSign) {
+                println "ℹ️  No signing configuration found - release APK will be unsigned"
+                println "   To sign your release APK, create frontend/android/signing.properties"
+                println "   or set RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD"
+                println "   See frontend/ANDROID_APK.md for details"
+            }
+        }
+    }
+    
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            
+            // Only apply signing config if explicitly enabled and configuration is available
+            if (System.getenv('ENABLE_RELEASE_SIGNING') == 'true') {
+                // Check if signing config is properly configured
+                def signingConfig = signingConfigs.release
+                if (signingConfig.storeFile != null && signingConfig.storeFile.exists()) {
+                    signingConfig signingConfigs.release
+                    println "🔐 Release signing enabled"
+                } else {
+                    println "⚠️  Release signing requested but configuration incomplete - building unsigned APK"
+                }
+            }
         }
     }
     

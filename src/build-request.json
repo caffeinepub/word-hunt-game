@@ -1,57 +1,38 @@
 {
   "kind": "build_request",
-  "title": "Prepare a production-ready final Android APK artifact",
+  "title": "Package current draft into a new Android APK and publish it for download",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-29",
-      "text": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to support building a release APK (in addition to debug) and to copy the resulting APK into `frontend/android-apk-output/` with a deterministic, clearly named filename.",
+      "id": "REQ-40",
+      "text": "Generate a fresh Android APK for the current deployed draft using the repository’s existing one-command build script, and ensure the resulting APK is published so the deployed web app serves it at `/downloads/word-hunt-latest.apk`.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-5"
         ],
         "quotes": [
-          "prep the final APK"
+          "package this draft into a new APK for download"
         ]
       },
       "acceptanceCriteria": [
-        "Running the script with an explicit release option (e.g., environment variable or CLI flag) builds the Android release APK via Gradle (assembleRelease or equivalent).",
-        "After a successful release build, the script copies the produced APK into `frontend/android-apk-output/` using a stable filename (e.g., `word-hunt-release-unsigned.apk` if unsigned).",
-        "The script continues to support the existing debug build behavior and output (debug APK + deterministic copy).",
-        "If the expected release APK file is not produced, the script fails with a clear English error message that prints the expected path(s).",
-        "At the end of the script run (debug or release), the script prints the final deterministic output path(s) for the generated APK artifact(s)."
-      ]
-    },
-    {
-      "id": "REQ-30",
-      "text": "Update `frontend/ANDROID_APK.md` to document how to produce the final (release) APK using the repository’s one-command build script, including the exact command(s) and the deterministic output path(s) under `frontend/android-apk-output/`.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "prep the final APK"
-        ]
-      },
-      "acceptanceCriteria": [
-        "`frontend/ANDROID_APK.md` includes an explicit section describing how to build a release APK using the one-command script (copy/paste-ready).",
-        "The documentation explicitly lists the deterministic output artifact path(s) under `frontend/android-apk-output/` for the release build.",
-        "The documentation continues to mention the Gradle output location(s) (under `frontend/android/app/build/outputs/...`) for reference, without removing existing debug instructions.",
-        "All user-facing documentation text is in English."
+        "Running `frontend/scripts/build-android-apk.sh` completes successfully for the intended build type (debug by default).",
+        "A deterministic APK artifact exists under `frontend/android-apk-output/` (e.g., `word-hunt-debug.apk` for debug builds).",
+        "A published copy exists at `frontend/dist/downloads/word-hunt-latest.apk` after the build completes.",
+        "A published copy exists at `frontend/public/downloads/word-hunt-latest.apk` so future web builds include the latest APK.",
+        "When the deployed site is updated with the new build output, requesting `GET /downloads/word-hunt-latest.apk` returns `200 OK` (or `206 Partial Content` when requested with a Range header).",
+        "In the app UI header, the download control labeled in English (“Download APK” / “APK”) becomes visible (i.e., the runtime APK availability check succeeds)."
       ]
     }
   ],
   "constraints": [
-    "Do not require any Motoko/backend changes for Android packaging.",
-    "Keep the existing Capacitor Android project structure under `frontend/android/`.",
-    "Do not modify files under `frontend/src/components/ui` or the immutable hook paths listed in SYSTEM_CONTEXT."
+    "Do not introduce new backend services or change the Motoko backend; APK packaging must use the existing Capacitor + Gradle project under `frontend/android/`.",
+    "Do not modify files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything in `frontend/src/components/ui` (compose these components only).",
+    "Keep the public download URL path exactly `/downloads/word-hunt-latest.apk` and keep user-facing text in English."
   ],
   "nonGoals": [
-    "Publishing to Google Play Store.",
-    "Implementing third-party authentication or external services as part of the APK build.",
-    "Changing gameplay, theme, timer rules, or word list as part of preparing the final APK."
+    "Implementing new gameplay features or UI redesign unrelated to APK packaging.",
+    "Adding third-party distribution channels (Play Store publishing) or external hosting for the APK."
   ],
   "imageRequirements": {
     "required": [],

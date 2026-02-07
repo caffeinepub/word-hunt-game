@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 31,
+  "projectStateVersion": 41,
   "summary": "Build a free Android mobile app titled \"Word Hunt Game\" featuring a word-hunt puzzle using a provided list of car-related words.",
   "architectural_notes": [
     "Remove difficulty selector/levels (Easy/Normal/Hard) from UI and puzzle generation parameters.",
@@ -9,11 +9,14 @@
     "Proceed with generating an Android-ready APK package (Android packaging step is now underway).",
     "User approved proceeding with generating the installable Android APK; APK build process started.",
     "Deployment completed successfully (Version 12 ready to preview).",
-    "User confirmed to proceed with generating the installable Android APK; APK build started.",
     "User confirmed everything looks right and approved proceeding with the final APK build; build started (Version 13).",
-    "User requested prepping the final Android APK; final APK build started (Version 14)."
+    "User requested prepping the final Android APK; final APK build started (Version 14).",
+    "User requested packaging Version 15 as the final APK for download; final APK build started and Version 15 deployed to production.",
+    "User requested packaging Draft/Production Version 19 into a new Android APK for download; APK build started."
   ],
-  "known_issues": [],
+  "known_issues": [
+    "Deployed site is missing `/downloads/word-hunt-latest.apk`, so the in-app \"Download Android APK\" button is hidden and no APK is downloadable on mobile."
+  ],
   "isFixRequest": false,
   "existing_features": [
     {
@@ -237,6 +240,86 @@
       "title": "Update `frontend/ANDROID_APK.md` to document how to produce the final (release) APK using the repository’s one-command build script, including the exact command(s) and the deterministic output path(s) under `frontend/android-apk-output/`.",
       "reqIds": [
         "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-to-support-generating-a-production-ready-signed-release-apk-in-addition-to-the-current-unsigned-release-apk-without-committing-any-keystore-files-to-the-repository",
+      "title": "Update the existing one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to support generating a production-ready **signed** release APK in addition to the current unsigned release APK, without committing any keystore files to the repository.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-gradle-release-signing-configuration-for-the-android-app-that-can-be-enabled-via-environment-variables-or-a-local-git-ignored-properties-file-so-that-release-builds-can-produce-a-signed-apk-suitable-for-direct-installation-download-distribution",
+      "title": "Add Gradle release signing configuration for the Android app that can be enabled via environment variables (or a local, git-ignored properties file) so that release builds can produce a signed APK suitable for direct installation/download distribution.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-android-apk-md-to-document-how-to-produce-the-final-downloadable-release-apk-using-the-repo-s-one-command-script-including-both-unsigned-and-signed-release-outputs-and-their-exact-deterministic-output-paths-under-frontend-android-apk-output",
+      "title": "Update `frontend/ANDROID_APK.md` to document how to produce the final downloadable release APK using the repo’s one-command script, including both unsigned and signed release outputs and their exact deterministic output paths under `frontend/android-apk-output/`.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-so-that-after-a-successful-apk-build-it-also-publishes-a-copy-of-the-apk-into-the-web-build-output-folder-frontend-dist-under-a-stable-url-path-e-g-frontend-dist-downloads-word-hunt-latest-apk-while-keeping-the-existing-deterministic-artifact-outputs-in-frontend-android-apk-output-unchanged",
+      "title": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) so that after a successful APK build it also publishes a copy of the APK into the web build output folder (`frontend/dist/`) under a stable URL path (e.g., `frontend/dist/downloads/word-hunt-latest.apk`) while keeping the existing deterministic artifact outputs in `frontend/android-apk-output/` unchanged.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-visible-mobile-friendly-ui-control-on-the-main-word-hunt-screen-that-allows-the-user-to-download-the-latest-android-apk-from-the-deployed-web-app-via-a-direct-link-to-downloads-word-hunt-latest-apk-user-facing-text-must-be-in-english",
+      "title": "Add a visible, mobile-friendly UI control on the main Word Hunt screen that allows the user to download the latest Android APK from the deployed web app via a direct link to `/downloads/word-hunt-latest.apk`. User-facing text must be in English.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-android-apk-md-to-document-how-to-build-and-obtain-the-apk-for-immediate-download-including-1-the-one-command-build-invocation-s-2-the-deterministic-artifact-paths-under-frontend-android-apk-output-for-debug-unsigned-release-signed-release-and-3-the-published-web-download-path-under-frontend-dist-downloads-word-hunt-latest-apk-and-its-corresponding-url-downloads-word-hunt-latest-apk",
+      "title": "Update `frontend/ANDROID_APK.md` to document how to build and obtain the APK for immediate download, including: (1) the one-command build invocation(s), (2) the deterministic artifact paths under `frontend/android-apk-output/` for debug/unsigned release/signed release, and (3) the published web-download path under `frontend/dist/downloads/word-hunt-latest.apk` and its corresponding URL `/downloads/word-hunt-latest.apk`.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-run-a-fresh-end-to-end-android-apk-build-using-the-existing-one-command-script-frontend-scripts-build-android-apk-sh-and-publish-the-newly-built-apk-into-the-web-build-output-at-frontend-dist-downloads-word-hunt-latest-apk-so-the-deployed-app-s-download-link-downloads-word-hunt-latest-apk-serves-the-latest-build",
+      "title": "Run a fresh end-to-end Android APK build using the existing one-command script (`frontend/scripts/build-android-apk.sh`) and publish the newly built APK into the web build output at `frontend/dist/downloads/word-hunt-latest.apk` so the deployed app’s download link `/downloads/word-hunt-latest.apk` serves the latest build.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-run-a-fresh-end-to-end-android-apk-build-using-the-existing-one-command-script-frontend-scripts-build-android-apk-sh-and-ensure-the-apk-is-published-into-the-web-build-output-at-frontend-dist-downloads-word-hunt-latest-apk-so-that-the-deployed-site-serves-the-latest-apk-at-the-url-path-downloads-word-hunt-latest-apk",
+      "title": "Run a fresh end-to-end Android APK build using the existing one-command script (`frontend/scripts/build-android-apk.sh`) and ensure the APK is published into the web build output at `frontend/dist/downloads/word-hunt-latest.apk` so that the deployed site serves the latest APK at the URL path `/downloads/word-hunt-latest.apk`.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-that-the-in-app-android-download-control-becomes-visible-by-confirming-the-runtime-apk-availability-check-succeeds-the-ui-should-display-the-download-button-labeled-in-english",
+      "title": "Verify that the in-app Android download control becomes visible by confirming the runtime APK availability check succeeds (the UI should display the download button labeled in English).",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-a-fresh-android-apk-for-the-current-deployed-draft-using-the-repository-s-existing-one-command-build-script-and-ensure-the-resulting-apk-is-published-so-the-deployed-web-app-serves-it-at-downloads-word-hunt-latest-apk",
+      "title": "Generate a fresh Android APK for the current deployed draft using the repository’s existing one-command build script, and ensure the resulting APK is published so the deployed web app serves it at `/downloads/word-hunt-latest.apk`.",
+      "reqIds": [
+        "REQ-40"
       ],
       "version": 1
     }

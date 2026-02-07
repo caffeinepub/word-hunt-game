@@ -1,40 +1,34 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Production-ready Android release APK build + documentation",
+  "title": "Publish latest Android APK at /downloads/word-hunt-latest.apk",
   "requirements": [
     {
-      "id": "REQ-29",
-      "summary": "Enhance the one-command Android APK build script to support release builds and deterministic artifact copying for both debug and release.",
+      "id": "REQ-40",
+      "summary": "Ensure the one-command Android APK build produces a deterministic artifact and publishes a copy that the deployed web app serves at /downloads/word-hunt-latest.apk, with the in-app Download APK control visible when available.",
       "acceptanceCriteria": [
-        "Running the script with an explicit release option (e.g., environment variable or CLI flag) builds the Android release APK via Gradle (assembleRelease or equivalent).",
-        "After a successful release build, the script copies the produced APK into `frontend/android-apk-output/` using a stable filename (e.g., `word-hunt-release-unsigned.apk` if unsigned).",
-        "The script continues to support the existing debug build behavior and output (debug APK + deterministic copy).",
-        "If the expected release APK file is not produced, the script fails with a clear English error message that prints the expected path(s).",
-        "At the end of the script run (debug or release), the script prints the final deterministic output path(s) for the generated APK artifact(s)."
+        "Running `frontend/scripts/build-android-apk.sh` completes successfully for the intended build type (debug by default).",
+        "A deterministic APK artifact exists under `frontend/android-apk-output/` (e.g., `word-hunt-debug.apk` for debug builds).",
+        "A published copy exists at `frontend/dist/downloads/word-hunt-latest.apk` after the build completes.",
+        "A published copy exists at `frontend/public/downloads/word-hunt-latest.apk` so future web builds include the latest APK.",
+        "When the deployed site is updated with the new build output, requesting `GET /downloads/word-hunt-latest.apk` returns `200 OK` (or `206 Partial Content` when requested with a Range header).",
+        "In the app UI header, the download control labeled in English (“Download APK” / “APK”) becomes visible (i.e., the runtime APK availability check succeeds)."
       ],
       "file_operations": [
         {
           "path": "frontend/scripts/build-android-apk.sh",
           "operation": "modify",
-          "description": "Add an explicit release build option (CLI flag and/or env var), run the corresponding Gradle task (debug vs release), copy the produced APK(s) into frontend/android-apk-output/ using deterministic filenames (keep existing debug output behavior), and improve failure handling to error in clear English when the expected APK file is missing while printing the expected path(s) and final deterministic output path(s)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-30",
-      "summary": "Document the release APK build process and deterministic output artifacts in ANDROID_APK.md.",
-      "acceptanceCriteria": [
-        "`frontend/ANDROID_APK.md` includes an explicit section describing how to build a release APK using the one-command script (copy/paste-ready).",
-        "The documentation explicitly lists the deterministic output artifact path(s) under `frontend/android-apk-output/` for the release build.",
-        "The documentation continues to mention the Gradle output location(s) (under `frontend/android/app/build/outputs/...`) for reference, without removing existing debug instructions.",
-        "All user-facing documentation text is in English."
-      ],
-      "file_operations": [
+          "description": "Harden the existing one-command APK build/publish flow to reliably (1) produce the deterministic artifact under `frontend/android-apk-output/` and (2) publish/overwrite `word-hunt-latest.apk` into BOTH `frontend/dist/downloads/` (for immediate deployment) and `frontend/public/downloads/` (to be included in future web builds), with clear failure messages if either publish step fails."
+        },
         {
-          "path": "frontend/ANDROID_APK.md",
+          "path": "frontend/public/downloads/.gitkeep",
           "operation": "modify",
-          "description": "Add/expand an English 'Release APK' section that shows the exact copy/paste command(s) to build a release APK via frontend/scripts/build-android-apk.sh, explicitly lists the deterministic output path(s) under frontend/android-apk-output/ (including the release artifact name), and keeps existing debug instructions plus references to Gradle output locations under frontend/android/app/build/outputs/...."
+          "description": "Keep the public downloads directory tracked and update/confirm directory notes (if any) so `frontend/public/downloads/` remains present for bundling `word-hunt-latest.apk` into future builds."
+        },
+        {
+          "path": "frontend/src/components/game/WordHuntScreen.tsx",
+          "operation": "modify",
+          "description": "Ensure the runtime APK availability check remains robust for static hosting (HEAD fallback to Range GET) and that the header shows the English-labeled download control (“Download APK” / “APK”) when `/downloads/word-hunt-latest.apk` is available. Verify the component's usage instructions before implementing."
         }
       ]
     }

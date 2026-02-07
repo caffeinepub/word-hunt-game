@@ -1,35 +1,27 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T07:14:50.531Z",
+  "generatedAt": "2026-02-07T08:04:37.574Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-29",
-        "summary": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to support building a release APK (in addition to debug) and to copy the resulting APK into `frontend/android-apk-output/` with a deterministic, clearly named filename.",
+        "id": "REQ-40",
+        "summary": "Generate a fresh Android APK for the current deployed draft using the repository’s existing one-command build script, and ensure the resulting APK is published so the deployed web app serves it at `/downloads/word-hunt-latest.apk`.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/scripts/build-android-apk.sh"
+          "frontend/scripts/build-android-apk.sh",
+          "frontend/public/downloads/.gitkeep",
+          "frontend/src/components/game/WordHuntScreen.tsx"
         ],
         "matchedFiles": [
-          "frontend/scripts/build-android-apk.sh"
-        ]
-      },
-      {
-        "id": "REQ-30",
-        "summary": "Update `frontend/ANDROID_APK.md` to document how to produce the final (release) APK using the repository’s one-command build script, including the exact command(s) and the deterministic output path(s) under `frontend/android-apk-output/`.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/ANDROID_APK.md"
-        ],
-        "matchedFiles": [
-          "frontend/ANDROID_APK.md"
+          "frontend/scripts/build-android-apk.sh",
+          "frontend/public/downloads/.gitkeep"
         ]
       }
     ]
@@ -39,7 +31,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/ANDROID_APK.md",
+    "frontend/public/downloads/.gitkeep",
     "frontend/scripts/build-android-apk.sh",
     "project_state.json",
     "scratch/component-selection.json",
