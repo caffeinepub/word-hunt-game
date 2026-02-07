@@ -1,6 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "User approval to proceed (no additional changes requested)",
-  "requirements": []
+  "title": "Production-ready Android release APK build + documentation",
+  "requirements": [
+    {
+      "id": "REQ-29",
+      "summary": "Enhance the one-command Android APK build script to support release builds and deterministic artifact copying for both debug and release.",
+      "acceptanceCriteria": [
+        "Running the script with an explicit release option (e.g., environment variable or CLI flag) builds the Android release APK via Gradle (assembleRelease or equivalent).",
+        "After a successful release build, the script copies the produced APK into `frontend/android-apk-output/` using a stable filename (e.g., `word-hunt-release-unsigned.apk` if unsigned).",
+        "The script continues to support the existing debug build behavior and output (debug APK + deterministic copy).",
+        "If the expected release APK file is not produced, the script fails with a clear English error message that prints the expected path(s).",
+        "At the end of the script run (debug or release), the script prints the final deterministic output path(s) for the generated APK artifact(s)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/scripts/build-android-apk.sh",
+          "operation": "modify",
+          "description": "Add an explicit release build option (CLI flag and/or env var), run the corresponding Gradle task (debug vs release), copy the produced APK(s) into frontend/android-apk-output/ using deterministic filenames (keep existing debug output behavior), and improve failure handling to error in clear English when the expected APK file is missing while printing the expected path(s) and final deterministic output path(s)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "summary": "Document the release APK build process and deterministic output artifacts in ANDROID_APK.md.",
+      "acceptanceCriteria": [
+        "`frontend/ANDROID_APK.md` includes an explicit section describing how to build a release APK using the one-command script (copy/paste-ready).",
+        "The documentation explicitly lists the deterministic output artifact path(s) under `frontend/android-apk-output/` for the release build.",
+        "The documentation continues to mention the Gradle output location(s) (under `frontend/android/app/build/outputs/...`) for reference, without removing existing debug instructions.",
+        "All user-facing documentation text is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/ANDROID_APK.md",
+          "operation": "modify",
+          "description": "Add/expand an English 'Release APK' section that shows the exact copy/paste command(s) to build a release APK via frontend/scripts/build-android-apk.sh, explicitly lists the deterministic output path(s) under frontend/android-apk-output/ (including the release artifact name), and keeps existing debug instructions plus references to Gradle output locations under frontend/android/app/build/outputs/...."
+        }
+      ]
+    }
+  ]
 }

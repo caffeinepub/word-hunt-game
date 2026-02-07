@@ -1,30 +1,60 @@
 {
   "kind": "build_request",
-  "title": "User approval to proceed (no additional changes requested)",
+  "title": "Prepare a production-ready final Android APK artifact",
   "priority": "normal",
-  "requirements": [],
+  "requirements": [
+    {
+      "id": "REQ-29",
+      "text": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to support building a release APK (in addition to debug) and to copy the resulting APK into `frontend/android-apk-output/` with a deterministic, clearly named filename.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "prep the final APK"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Running the script with an explicit release option (e.g., environment variable or CLI flag) builds the Android release APK via Gradle (assembleRelease or equivalent).",
+        "After a successful release build, the script copies the produced APK into `frontend/android-apk-output/` using a stable filename (e.g., `word-hunt-release-unsigned.apk` if unsigned).",
+        "The script continues to support the existing debug build behavior and output (debug APK + deterministic copy).",
+        "If the expected release APK file is not produced, the script fails with a clear English error message that prints the expected path(s).",
+        "At the end of the script run (debug or release), the script prints the final deterministic output path(s) for the generated APK artifact(s)."
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "text": "Update `frontend/ANDROID_APK.md` to document how to produce the final (release) APK using the repository’s one-command build script, including the exact command(s) and the deterministic output path(s) under `frontend/android-apk-output/`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "prep the final APK"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/ANDROID_APK.md` includes an explicit section describing how to build a release APK using the one-command script (copy/paste-ready).",
+        "The documentation explicitly lists the deterministic output artifact path(s) under `frontend/android-apk-output/` for the release build.",
+        "The documentation continues to mention the Gradle output location(s) (under `frontend/android/app/build/outputs/...`) for reference, without removing existing debug instructions.",
+        "All user-facing documentation text is in English."
+      ]
+    }
+  ],
   "constraints": [
-    "Do not modify any frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Respect the existing single-actor Motoko backend architecture; keep backend logic in backend/main.mo.",
-    "Use English for any user-facing text."
+    "Do not require any Motoko/backend changes for Android packaging.",
+    "Keep the existing Capacitor Android project structure under `frontend/android/`.",
+    "Do not modify files under `frontend/src/components/ui` or the immutable hook paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Adding new gameplay features or changing the Word Hunt rules/mechanics.",
-    "Changing Android packaging approach or build outputs beyond what is already implemented in the repository scripts and docs.",
-    "Backend changes (the Android packaging flow must not require Motoko/backend changes)."
+    "Publishing to Google Play Store.",
+    "Implementing third-party authentication or external services as part of the APK build.",
+    "Changing gameplay, theme, timer rules, or word list as part of preparing the final APK."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

@@ -10,11 +10,12 @@ This guide explains how to package the Word Hunt Game as an installable Android 
 
 1. [Prerequisites](#prerequisites)
 2. [Build APK (One Command)](#build-apk-one-command)
-3. [PWA Assets Reference](#pwa-assets-reference)
-4. [Approach 1: Bubblewrap TWA](#approach-1-bubblewrap-twa)
-5. [Approach 2: Capacitor WebView](#approach-2-capacitor-webview)
-6. [Troubleshooting](#troubleshooting)
-7. [Production Release](#production-release)
+3. [Release APK](#release-apk)
+4. [PWA Assets Reference](#pwa-assets-reference)
+5. [Approach 1: Bubblewrap TWA](#approach-1-bubblewrap-twa)
+6. [Approach 2: Capacitor WebView](#approach-2-capacitor-webview)
+7. [Troubleshooting](#troubleshooting)
+8. [Production Release](#production-release)
 
 ---
 

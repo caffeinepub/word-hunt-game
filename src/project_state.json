@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 29,
+  "projectStateVersion": 31,
   "summary": "Build a free Android mobile app titled \"Word Hunt Game\" featuring a word-hunt puzzle using a provided list of car-related words.",
   "architectural_notes": [
     "Remove difficulty selector/levels (Easy/Normal/Hard) from UI and puzzle generation parameters.",
@@ -10,7 +10,8 @@
     "User approved proceeding with generating the installable Android APK; APK build process started.",
     "Deployment completed successfully (Version 12 ready to preview).",
     "User confirmed to proceed with generating the installable Android APK; APK build started.",
-    "User confirmed everything looks right and approved proceeding with the final APK build; build started (Version 13)."
+    "User confirmed everything looks right and approved proceeding with the final APK build; build started (Version 13).",
+    "User requested prepping the final Android APK; final APK build started (Version 14)."
   ],
   "known_issues": [],
   "isFixRequest": false,
@@ -220,6 +221,22 @@
       "title": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to produce a deterministic, clearly named APK artifact by copying the generated debug APK into a stable repo folder (e.g., `frontend/android-apk-output/`) after a successful build.",
       "reqIds": [
         "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-to-support-building-a-release-apk-in-addition-to-debug-and-to-copy-the-resulting-apk-into-frontend-android-apk-output-with-a-deterministic-clearly-named-filename",
+      "title": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to support building a release APK (in addition to debug) and to copy the resulting APK into `frontend/android-apk-output/` with a deterministic, clearly named filename.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-android-apk-md-to-document-how-to-produce-the-final-release-apk-using-the-repository-s-one-command-build-script-including-the-exact-command-s-and-the-deterministic-output-path-s-under-frontend-android-apk-output",
+      "title": "Update `frontend/ANDROID_APK.md` to document how to produce the final (release) APK using the repository’s one-command build script, including the exact command(s) and the deterministic output path(s) under `frontend/android-apk-output/`.",
+      "reqIds": [
+        "REQ-30"
       ],
       "version": 1
     }

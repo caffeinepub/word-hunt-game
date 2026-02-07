@@ -12,12 +12,52 @@ set -e
 # - ANDROID_HOME must be set and point to Android SDK
 # - Gradle wrapper must exist at frontend/android/gradlew
 #
+# Usage:
+#   ./build-android-apk.sh           # Build debug APK (default)
+#   ./build-android-apk.sh --release # Build release APK
+#   BUILD_TYPE=release ./build-android-apk.sh  # Build release APK (env var)
+#
 # Output:
-# - Debug APK: frontend/android/app/build/outputs/apk/debug/app-debug.apk
-# - Deterministic copy: frontend/android-apk-output/word-hunt-debug.apk
+# - Debug APK: frontend/android-apk-output/word-hunt-debug.apk
+# - Release APK: frontend/android-apk-output/word-hunt-release-unsigned.apk
 # ============================================================================
 
+# ============================================================================
+# Parse Arguments and Determine Build Type
+# ============================================================================
+BUILD_TYPE="debug"
+
+# Check for --release flag
+for arg in "$@"; do
+  if [ "$arg" = "--release" ]; then
+    BUILD_TYPE="release"
+  fi
+done
+
+# Check for BUILD_TYPE environment variable
+if [ -n "$BUILD_TYPE_ENV" ]; then
+  BUILD_TYPE="$BUILD_TYPE_ENV"
+fi
+
+# Normalize build type to lowercase
+BUILD_TYPE=$(echo "$BUILD_TYPE" | tr '[:upper:]' '[:lower:]')
+
+# Validate build type
+if [ "$BUILD_TYPE" != "debug" ] && [ "$BUILD_TYPE" != "release" ]; then
+  echo "❌ ERROR: Invalid build type '$BUILD_TYPE'"
+  echo ""
+  echo "Valid options: debug, release"
+  echo ""
+  echo "Usage:"
+  echo "  ./build-android-apk.sh           # Build debug APK (default)"
+  echo "  ./build-android-apk.sh --release # Build release APK"
+  echo "  BUILD_TYPE=release ./build-android-apk.sh  # Build release APK (env var)"
+  echo ""
+  exit 1
+fi
+
 echo "🚀 Starting Android APK build for Word Hunt Game..."
+echo "📦 Build type: $BUILD_TYPE"
 echo ""
 
 # Determine script directory and project root
@@ -185,8 +225,17 @@ echo ""
 echo "📱 Building Android APK with Gradle..."
 cd "$FRONTEND_DIR/android"
 
-# Build debug APK by default
-"$GRADLEW" assembleDebug
+# Determine Gradle task based on build type
+if [ "$BUILD_TYPE" = "release" ]; then
+  GRADLE_TASK="assembleRelease"
+  echo "Building release APK..."
+else
+  GRADLE_TASK="assembleDebug"
+  echo "Building debug APK..."
+fi
+
+# Build APK
+"$GRADLEW" "$GRADLE_TASK"
 
 echo ""
 echo "✅ Android APK build completed!"
@@ -197,40 +246,67 @@ echo ""
 # ============================================================================
 echo "📦 Copying APK to deterministic output directory..."
 
-# Define paths
-DEBUG_APK="$FRONTEND_DIR/android/app/build/outputs/apk/debug/app-debug.apk"
+# Define paths based on build type
 OUTPUT_DIR="$FRONTEND_DIR/android-apk-output"
-OUTPUT_APK="$OUTPUT_DIR/word-hunt-debug.apk"
-
-# Ensure output directory exists
 mkdir -p "$OUTPUT_DIR"
 
-# Verify the debug APK exists
-if [ ! -f "$DEBUG_APK" ]; then
-  echo ""
-  echo "❌ ERROR: Debug APK not found after Gradle build."
-  echo ""
-  echo "Expected location: $DEBUG_APK"
-  echo ""
-  echo "The Gradle build completed but did not produce the expected APK file."
-  echo "This may indicate a build configuration issue or Gradle task failure."
-  echo ""
-  echo "Please check the Gradle output above for errors and ensure:"
-  echo "  - The assembleDebug task completed successfully"
-  echo "  - No build errors occurred during compilation"
-  echo "  - The Android project configuration is correct"
-  echo ""
-  exit 1
+if [ "$BUILD_TYPE" = "release" ]; then
+  # Release APK paths
+  GRADLE_APK="$FRONTEND_DIR/android/app/build/outputs/apk/release/app-release-unsigned.apk"
+  OUTPUT_APK="$OUTPUT_DIR/word-hunt-release-unsigned.apk"
+  
+  # Verify the release APK exists
+  if [ ! -f "$GRADLE_APK" ]; then
+    echo ""
+    echo "❌ ERROR: Release APK not found after Gradle build."
+    echo ""
+    echo "Expected location: $GRADLE_APK"
+    echo ""
+    echo "The Gradle build completed but did not produce the expected APK file."
+    echo "This may indicate a build configuration issue or Gradle task failure."
+    echo ""
+    echo "Please check the Gradle output above for errors and ensure:"
+    echo "  - The assembleRelease task completed successfully"
+    echo "  - No build errors occurred during compilation"
+    echo "  - The Android project configuration is correct"
+    echo ""
+    echo "Note: Release builds produce unsigned APKs by default."
+    echo "For signed APKs, configure signing in android/app/build.gradle"
+    echo ""
+    exit 1
+  fi
+else
+  # Debug APK paths
+  GRADLE_APK="$FRONTEND_DIR/android/app/build/outputs/apk/debug/app-debug.apk"
+  OUTPUT_APK="$OUTPUT_DIR/word-hunt-debug.apk"
+  
+  # Verify the debug APK exists
+  if [ ! -f "$GRADLE_APK" ]; then
+    echo ""
+    echo "❌ ERROR: Debug APK not found after Gradle build."
+    echo ""
+    echo "Expected location: $GRADLE_APK"
+    echo ""
+    echo "The Gradle build completed but did not produce the expected APK file."
+    echo "This may indicate a build configuration issue or Gradle task failure."
+    echo ""
+    echo "Please check the Gradle output above for errors and ensure:"
+    echo "  - The assembleDebug task completed successfully"
+    echo "  - No build errors occurred during compilation"
+    echo "  - The Android project configuration is correct"
+    echo ""
+    exit 1
+  fi
 fi
 
 # Copy the APK to the deterministic output directory
-cp "$DEBUG_APK" "$OUTPUT_APK"
+cp "$GRADLE_APK" "$OUTPUT_APK"
 
 if [ ! -f "$OUTPUT_APK" ]; then
   echo ""
   echo "❌ ERROR: Failed to copy APK to output directory."
   echo ""
-  echo "Source: $DEBUG_APK"
+  echo "Source: $GRADLE_APK"
   echo "Target: $OUTPUT_APK"
   echo ""
   exit 1
@@ -246,27 +322,26 @@ echo "📦 APK Output Locations:"
 echo ""
 
 # Show Gradle output location
-if [ -f "$DEBUG_APK" ]; then
-  APK_SIZE=$(du -h "$DEBUG_APK" | cut -f1)
-  echo "  ✅ Gradle Debug APK ($APK_SIZE):"
-  echo "     $DEBUG_APK"
+if [ -f "$GRADLE_APK" ]; then
+  APK_SIZE=$(du -h "$GRADLE_APK" | cut -f1)
+  if [ "$BUILD_TYPE" = "release" ]; then
+    echo "  ✅ Gradle Release APK ($APK_SIZE):"
+  else
+    echo "  ✅ Gradle Debug APK ($APK_SIZE):"
+  fi
+  echo "     $GRADLE_APK"
   echo ""
 fi
 
 # Show deterministic output location
 if [ -f "$OUTPUT_APK" ]; then
   APK_SIZE=$(du -h "$OUTPUT_APK" | cut -f1)
-  echo "  ✅ Deterministic Output APK ($APK_SIZE):"
+  if [ "$BUILD_TYPE" = "release" ]; then
+    echo "  ✅ Deterministic Release APK ($APK_SIZE):"
+  else
+    echo "  ✅ Deterministic Debug APK ($APK_SIZE):"
+  fi
   echo "     $OUTPUT_APK"
-  echo ""
-fi
-
-# Check for release APK (optional)
-RELEASE_APK="$FRONTEND_DIR/android/app/build/outputs/apk/release/app-release-unsigned.apk"
-if [ -f "$RELEASE_APK" ]; then
-  APK_SIZE=$(du -h "$RELEASE_APK" | cut -f1)
-  echo "  ✅ Release APK ($APK_SIZE):"
-  echo "     $RELEASE_APK"
   echo ""
 fi
 
@@ -275,6 +350,14 @@ echo ""
 echo "📍 Deterministic APK path:"
 echo "   $OUTPUT_APK"
 echo ""
+
+if [ "$BUILD_TYPE" = "release" ]; then
+  echo "⚠️  Note: This is an unsigned release APK."
+  echo "   For production distribution, you should sign the APK with your release key."
+  echo "   See frontend/ANDROID_APK.md for signing instructions."
+  echo ""
+fi
+
 echo "To install:"
 echo "  1. Transfer the APK to your Android device"
 echo "  2. Enable 'Install from Unknown Sources' in device settings"

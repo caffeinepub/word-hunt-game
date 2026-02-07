@@ -1,37 +1,48 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T07:07:52.254Z",
-  "summary": "BuildRequest specified no requirements and explicitly called for no additional changes. The diff introduces new frontend and backend functionality (URL/session param utilities, admin token handling in actor creation, and a user-approval/access-control system in the Motoko backend), including modifications to files that were declared immutable and backend logic that was declared a non-goal.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-07T07:14:50.528Z",
+  "summary": "REQ-30 appears implemented (ANDROID_APK.md documents release build command and deterministic output paths). REQ-29 is partially evidenced (script adds a --release flag and deterministic output filenames), but some acceptance-criteria behaviors are not verifiable from the truncated diff, and one environment-variable mechanism appears incorrect based on the shown code.",
+  "missing_requirements": [
     {
-      "description": "Added URL parameter/sessionStorage utilities for extracting and persisting URL parameters (including hash/query parsing and clearing params from hash).",
-      "reason": "No new features were requested; BuildRequest states 'no additional changes requested' and 'Requirements: none'.",
+      "id": "REQ-29",
+      "requirement": "Support building a release APK via an explicit release option (environment variable or CLI flag).",
+      "reason": "The script documents and checks an env-var option, but the code checks `BUILD_TYPE_ENV` rather than the documented `BUILD_TYPE`, so the environment-variable release option as described in the script header likely will not work as intended.",
       "evidence": [
-        "frontend/src/utils/urlParams.ts"
+        "frontend/scripts/build-android-apk.sh (truncated): header shows `BUILD_TYPE=release ./build-android-apk.sh`, but code uses `if [ -n \"$BUILD_TYPE_ENV\" ]; then ...`"
       ]
     },
     {
-      "description": "Changed actor initialization to read a secret/admin token from URL parameters and call backend initialization with that secret; added query invalidation/refetch behavior tied to actor changes.",
-      "reason": "No new features were requested; additionally this modifies an immutable frontend path per constraints.",
+      "id": "REQ-29",
+      "requirement": "If the expected release APK file is not produced, the script fails with a clear English error message that prints the expected path(s).",
+      "reason": "The diff excerpt does not show any logic that checks for the expected release APK output file(s) and prints the expected path(s) on failure (content is truncated before any such section).",
       "evidence": [
-        "frontend/src/hooks/useActor.ts"
+        "frontend/scripts/build-android-apk.sh (truncated)"
       ]
     },
     {
-      "description": "Introduced/expanded backend user-approval and access-control endpoints and added profile storage gated by approval/admin checks (e.g., isCallerApproved, requestApproval, setApproval, listApprovals, save/get profiles, role queries/assignment).",
-      "reason": "No new features were requested; additionally, backend changes were explicitly a non-goal ('Backend changes ... must not require Motoko/backend changes'), yet backend/main.mo was modified.",
+      "id": "REQ-29",
+      "requirement": "At the end of the script run (debug or release), print the final deterministic output path(s) for the generated APK artifact(s).",
+      "reason": "The diff excerpt does not include the end-of-script behavior, so it’s not evidenced that the script prints the final deterministic output path(s) after building/copying.",
       "evidence": [
-        "backend/main.mo"
+        "frontend/scripts/build-android-apk.sh (truncated)"
       ]
     }
   ],
-  "confidence": 0.86,
+  "hallucinated_features": [
+    {
+      "description": "Documentation adds an additional, alternative Android packaging approach (Trusted Web Activity (TWA) via Bubblewrap) beyond the requested one-command Capacitor/Gradle APK build documentation.",
+      "reason": "BuildRequest only asks to document producing a final release APK using the repository’s one-command build script and to keep referencing Gradle output locations. Introducing a separate Bubblewrap/TWA approach is not requested.",
+      "evidence": [
+        "frontend/ANDROID_APK.md: \"two different approaches: Trusted Web Activity (TWA) via Bubblewrap, or Capacitor\"; section \"Approach 1: Bubblewrap TWA\" referenced in ToC"
+      ]
+    }
+  ],
+  "confidence": 0.64,
   "changed_files": [
-    "backend/main.mo",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/utils/urlParams.ts",
+    "frontend-file-summaries.txt",
+    "frontend/ANDROID_APK.md",
+    "frontend/scripts/build-android-apk.sh",
     "project_state.json"
   ]
 }
