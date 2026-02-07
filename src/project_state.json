@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 41,
+  "projectStateVersion": 43,
   "summary": "Build a free Android mobile app titled \"Word Hunt Game\" featuring a word-hunt puzzle using a provided list of car-related words.",
   "architectural_notes": [
     "Remove difficulty selector/levels (Easy/Normal/Hard) from UI and puzzle generation parameters.",
@@ -15,9 +15,10 @@
     "User requested packaging Draft/Production Version 19 into a new Android APK for download; APK build started."
   ],
   "known_issues": [
-    "Deployed site is missing `/downloads/word-hunt-latest.apk`, so the in-app \"Download Android APK\" button is hidden and no APK is downloadable on mobile."
+    "Deployed site is missing `/downloads/word-hunt-latest.apk`, so the in-app \"Download Android APK\" button is hidden and no APK is downloadable on mobile.",
+    "APK packaging step encountered an internal LLM/system error; build was retried."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-the-main-game-screen-for-a-mobile-friendly-web-app-titled-word-hunt-game-that-plays-as-a-word-hunt-word-search-puzzle",
@@ -320,6 +321,30 @@
       "title": "Generate a fresh Android APK for the current deployed draft using the repository’s existing one-command build script, and ensure the resulting APK is published so the deployed web app serves it at `/downloads/word-hunt-latest.apk`.",
       "reqIds": [
         "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-to-publish-the-newly-built-apk-to-the-deployed-web-asset-path-so-that-the-deployed-site-serves-the-file-at-downloads-word-hunt-latest-apk-i-e-ensure-the-build-output-contains-frontend-dist-downloads-word-hunt-latest-apk-and-that-the-repo-static-directory-frontend-public-downloads-word-hunt-latest-apk-is-also-kept-in-sync-if-it-is-used-by-the-deployment-pipeline",
+      "title": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to publish the newly built APK to the deployed web asset path so that the deployed site serves the file at `/downloads/word-hunt-latest.apk` (i.e., ensure the build output contains `frontend/dist/downloads/word-hunt-latest.apk` and that the repo static directory `frontend/public/downloads/word-hunt-latest.apk` is also kept in sync if it is used by the deployment pipeline).",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-fail-fast-verification-step-at-the-end-of-frontend-scripts-build-android-apk-sh-that-checks-the-published-apk-exists-and-is-non-empty-at-frontend-dist-downloads-word-hunt-latest-apk-and-if-applicable-frontend-public-downloads-word-hunt-latest-apk-and-prints-clear-english-instructions-if-the-file-is-missing-so-apk-packaging-retries-do-not-silently-succeed-while-the-download-remains-unavailable",
+      "title": "Add a fail-fast verification step at the end of `frontend/scripts/build-android-apk.sh` that checks the published APK exists and is non-empty at `frontend/dist/downloads/word-hunt-latest.apk` (and, if applicable, `frontend/public/downloads/word-hunt-latest.apk`), and prints clear English instructions if the file is missing so APK packaging retries do not silently succeed while the download remains unavailable.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-in-app-apk-availability-check-results-in-the-word-hunt-screen-showing-the-download-control-once-downloads-word-hunt-latest-apk-is-present-so-that-a-successful-packaging-retry-makes-the-download-apk-button-visible-without-any-manual-client-side-steps",
+      "title": "Ensure the in-app APK availability check results in the Word Hunt screen showing the download control once `/downloads/word-hunt-latest.apk` is present, so that a successful packaging retry makes the \"Download APK\" button visible without any manual client-side steps.",
+      "reqIds": [
+        "REQ-43"
       ],
       "version": 1
     }

@@ -1,38 +1,71 @@
 {
   "kind": "build_request",
-  "title": "Package current draft into a new Android APK and publish it for download",
-  "priority": "normal",
+  "title": "Retry Android APK packaging by ensuring the latest APK is published and verifiably available at /downloads/word-hunt-latest.apk",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-40",
-      "text": "Generate a fresh Android APK for the current deployed draft using the repository’s existing one-command build script, and ensure the resulting APK is published so the deployed web app serves it at `/downloads/word-hunt-latest.apk`.",
+      "id": "REQ-41",
+      "text": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to publish the newly built APK to the deployed web asset path so that the deployed site serves the file at `/downloads/word-hunt-latest.apk` (i.e., ensure the build output contains `frontend/dist/downloads/word-hunt-latest.apk` and that the repo static directory `frontend/public/downloads/word-hunt-latest.apk` is also kept in sync if it is used by the deployment pipeline).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-10"
         ],
         "quotes": [
-          "package this draft into a new APK for download"
+          "yes, try again"
         ]
       },
       "acceptanceCriteria": [
-        "Running `frontend/scripts/build-android-apk.sh` completes successfully for the intended build type (debug by default).",
-        "A deterministic APK artifact exists under `frontend/android-apk-output/` (e.g., `word-hunt-debug.apk` for debug builds).",
-        "A published copy exists at `frontend/dist/downloads/word-hunt-latest.apk` after the build completes.",
-        "A published copy exists at `frontend/public/downloads/word-hunt-latest.apk` so future web builds include the latest APK.",
-        "When the deployed site is updated with the new build output, requesting `GET /downloads/word-hunt-latest.apk` returns `200 OK` (or `206 Partial Content` when requested with a Range header).",
-        "In the app UI header, the download control labeled in English (“Download APK” / “APK”) becomes visible (i.e., the runtime APK availability check succeeds)."
+        "After running `frontend/scripts/build-android-apk.sh`, the file `frontend/dist/downloads/word-hunt-latest.apk` exists.",
+        "The published APK filename in the web build output is exactly `word-hunt-latest.apk` under the `downloads/` directory.",
+        "If the project’s deployment serves static assets from `frontend/public/`, then `frontend/public/downloads/word-hunt-latest.apk` is also created/updated to match the newly built APK.",
+        "The resulting deployed site serves the APK at the URL path `/downloads/word-hunt-latest.apk` (HTTP 200 or 206 for ranged requests)."
+      ]
+    },
+    {
+      "id": "REQ-42",
+      "text": "Add a fail-fast verification step at the end of `frontend/scripts/build-android-apk.sh` that checks the published APK exists and is non-empty at `frontend/dist/downloads/word-hunt-latest.apk` (and, if applicable, `frontend/public/downloads/word-hunt-latest.apk`), and prints clear English instructions if the file is missing so APK packaging retries do not silently succeed while the download remains unavailable.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-10"
+        ],
+        "quotes": [
+          "yes, try again"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If `frontend/dist/downloads/word-hunt-latest.apk` is missing (or zero bytes), the script exits non-zero and prints an English error message that includes the expected path(s).",
+        "If the publish step succeeds, the script prints an English success message that includes the final published path `frontend/dist/downloads/word-hunt-latest.apk` and the corresponding URL path `/downloads/word-hunt-latest.apk`."
+      ]
+    },
+    {
+      "id": "REQ-43",
+      "text": "Ensure the in-app APK availability check results in the Word Hunt screen showing the download control once `/downloads/word-hunt-latest.apk` is present, so that a successful packaging retry makes the \"Download APK\" button visible without any manual client-side steps.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-10"
+        ],
+        "quotes": [
+          "yes, try again"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When `/downloads/word-hunt-latest.apk` is available on the deployed site, the Word Hunt header displays the download button labeled in English (\"Download APK\" on larger screens, \"APK\" on small screens).",
+        "When `/downloads/word-hunt-latest.apk` is not available, the download button is not shown."
       ]
     }
   ],
   "constraints": [
-    "Do not introduce new backend services or change the Motoko backend; APK packaging must use the existing Capacitor + Gradle project under `frontend/android/`.",
-    "Do not modify files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything in `frontend/src/components/ui` (compose these components only).",
-    "Keep the public download URL path exactly `/downloads/word-hunt-latest.apk` and keep user-facing text in English."
+    "Do not modify any files under `frontend/src/components/ui` (read-only UI primitives).",
+    "Do not introduce additional backend canisters or databases; keep the existing single-actor Motoko backend unchanged unless strictly necessary for APK publishing (it should not be necessary).",
+    "All user-facing text related to the APK/download flow must be in English."
   ],
   "nonGoals": [
-    "Implementing new gameplay features or UI redesign unrelated to APK packaging.",
-    "Adding third-party distribution channels (Play Store publishing) or external hosting for the APK."
+    "Changing Word Hunt gameplay mechanics, grid generation, word list, or timer behavior.",
+    "Adding new authentication providers beyond Internet Identity.",
+    "Implementing a new download endpoint in the Motoko backend (APK must remain a static web asset)."
   ],
   "imageRequirements": {
     "required": [],

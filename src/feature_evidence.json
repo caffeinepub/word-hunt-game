@@ -2,10 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-generate-a-fresh-android-apk-for-the-current-deployed-draft-using-the-repository-s-existing-one-command-build-script-and-ensure-the-resulting-apk-is-published-so-the-deployed-web-app-serves-it-at-downloads-word-hunt-latest-apk",
-      "featureTitle": "Generate a fresh Android APK for the current deployed draft using the repository’s existing one-command build script, and ensure the resulting APK is published so the deployed web app serves it at `/downloads/word-hunt-latest.apk`.",
+      "featureId": "feature-update-the-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-to-publish-the-newly-built-apk-to-the-deployed-web-asset-path-so-that-the-deployed-site-serves-the-file-at-downloads-word-hunt-latest-apk-i-e-ensure-the-build-output-contains-frontend-dist-downloads-word-hunt-latest-apk-and-that-the-repo-static-directory-frontend-public-downloads-word-hunt-latest-apk-is-also-kept-in-sync-if-it-is-used-by-the-deployment-pipeline",
+      "featureTitle": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to publish the newly built APK to the deployed web asset path so that the deployed site serves the file at `/downloads/word-hunt-latest.apk` (i.e., ensure the build output contains `frontend/dist/downloads/word-hunt-latest.apk` and that the repo static directory `frontend/public/downloads/word-hunt-latest.apk` is also kept in sync if it is used by the deployment pipeline).",
       "files": [
-        "frontend/public/downloads/.gitkeep",
         "frontend/scripts/build-android-apk.sh"
       ],
       "components": [
@@ -18,7 +17,47 @@
         "user-approval@3.0.0"
       ],
       "testIds": [
-        "REQ-40"
+        "REQ-41"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-fail-fast-verification-step-at-the-end-of-frontend-scripts-build-android-apk-sh-that-checks-the-published-apk-exists-and-is-non-empty-at-frontend-dist-downloads-word-hunt-latest-apk-and-if-applicable-frontend-public-downloads-word-hunt-latest-apk-and-prints-clear-english-instructions-if-the-file-is-missing-so-apk-packaging-retries-do-not-silently-succeed-while-the-download-remains-unavailable",
+      "featureTitle": "Add a fail-fast verification step at the end of `frontend/scripts/build-android-apk.sh` that checks the published APK exists and is non-empty at `frontend/dist/downloads/word-hunt-latest.apk` (and, if applicable, `frontend/public/downloads/word-hunt-latest.apk`), and prints clear English instructions if the file is missing so APK packaging retries do not silently succeed while the download remains unavailable.",
+      "files": [
+        "frontend/scripts/build-android-apk.sh"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "user-approval@3.0.0"
+      ],
+      "testIds": [
+        "REQ-42"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-in-app-apk-availability-check-results-in-the-word-hunt-screen-showing-the-download-control-once-downloads-word-hunt-latest-apk-is-present-so-that-a-successful-packaging-retry-makes-the-download-apk-button-visible-without-any-manual-client-side-steps",
+      "featureTitle": "Ensure the in-app APK availability check results in the Word Hunt screen showing the download control once `/downloads/word-hunt-latest.apk` is present, so that a successful packaging retry makes the \"Download APK\" button visible without any manual client-side steps.",
+      "files": [
+        "frontend/src/components/game/WordHuntScreen.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "user-approval@3.0.0"
+      ],
+      "testIds": [
+        "REQ-43"
       ],
       "confidence": "high"
     }

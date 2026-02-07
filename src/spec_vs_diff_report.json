@@ -1,83 +1,40 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T08:04:37.571Z",
-  "summary": "REQ-40 APK packaging/publishing work is partially evidenced by changes to the one-command build script and addition of a downloads directory placeholder, plus UI work to surface an APK download control. However, the diff also includes many unrelated gameplay/PWA/theme changes that were not requested and violate the stated non-goals/constraints. Due to truncation, some REQ-40 acceptance criteria cannot be conclusively verified from the diff summary alone (e.g., the exact publishing/copy behavior and exact URL used at runtime).",
+  "generatedAt": "2026-02-07T08:19:40.915Z",
+  "summary": "REQ-43 appears to be implemented in WordHuntScreen via an APK availability probe to /downloads/word-hunt-latest.apk (HEAD with GET+Range fallback) and re-checking logic, but the diff is truncated before showing the actual conditional rendering of the Download button. For REQ-41 and REQ-42, the build script includes comments indicating intended publish locations, but the truncated diff does not provide enough evidence that the script actually copies the built APK into frontend/dist/downloads/word-hunt-latest.apk (and optionally frontend/public/downloads/word-hunt-latest.apk) and performs the required fail-fast verification with the specified success/error messaging.",
   "missing_requirements": [
     {
-      "id": "REQ-40",
-      "requirement": "Ensure the resulting APK is published so the deployed web app serves it at the exact path `/downloads/word-hunt-latest.apk` (including runtime availability check succeeding).",
-      "reason": "The diff summary mentions a header download button and a probe, but does not show the exact URL string used or confirm it is exactly `/downloads/word-hunt-latest.apk` (content is truncated / described at a high level).",
+      "id": "REQ-41",
+      "requirement": "Update frontend/scripts/build-android-apk.sh to publish the newly built APK as a static asset at frontend/dist/downloads/word-hunt-latest.apk (and keep frontend/public/downloads/word-hunt-latest.apk in sync if used).",
+      "reason": "The diff snippet shows updated script documentation/output-path comments, but does not show the actual publish/copy step that ensures the built APK is placed at frontend/dist/downloads/word-hunt-latest.apk (and optionally in frontend/public/downloads/) after running the script.",
       "evidence": [
-        "frontend-file-summaries.txt (entry for frontend/src/components/game/WordHuntScreen.tsx is descriptive only; actual code/URL not shown)"
+        "frontend/scripts/build-android-apk.sh (truncated)"
       ]
     },
     {
-      "id": "REQ-40",
-      "requirement": "After the build completes, publish a copy at `frontend/dist/downloads/word-hunt-latest.apk` and at `frontend/public/downloads/word-hunt-latest.apk`.",
-      "reason": "The build script comments/documentation state these outputs, and a `frontend/public/downloads/.gitkeep` is present, but the diff summary does not provide non-comment evidence (e.g., the relevant copy commands or resulting files) because the script content is truncated and no output artifact paths are shown being written.",
+      "id": "REQ-42",
+      "requirement": "Add a fail-fast verification step at the end of frontend/scripts/build-android-apk.sh that checks the published APK exists and is non-empty at frontend/dist/downloads/word-hunt-latest.apk (and, if applicable, frontend/public/downloads/word-hunt-latest.apk) and prints clear English instructions on failure and a success message including the final path and URL.",
+      "reason": "The truncated script excerpt does not include an end-of-script verification that checks for existence/non-zero size of the published APK, nor does it show the required explicit success message including both the final filesystem path and the URL path.",
       "evidence": [
-        "frontend/scripts/build-android-apk.sh (truncated; only header/comments shown about outputs)",
-        "frontend/public/downloads/.gitkeep"
+        "frontend/scripts/build-android-apk.sh (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-43",
+      "requirement": "Ensure the in-app APK availability check results in the Word Hunt header showing the download control only when /downloads/word-hunt-latest.apk is available, with English labels (\"Download APK\" large screens, \"APK\" small screens).",
+      "reason": "The code includes apkAvailable state and availability checks, but the diff is truncated before the JSX section that would prove the header conditionally renders the download button with the required labels and responsive behavior.",
+      "evidence": [
+        "frontend/src/components/game/WordHuntScreen.tsx (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Gameplay changes: fixed 15x15 grid size, new/changed countdown timer behavior, time-up warning messaging, separate next-game time limit state, and prevention of selections when time is up.",
-      "reason": "BuildRequest is strictly about generating/publishing an Android APK and making an APK download control visible; it explicitly lists non-goals as new gameplay features or redesign unrelated to APK packaging.",
-      "evidence": [
-        "frontend-file-summaries.txt (entries for frontend/src/hooks/useWordHuntGame.ts and frontend/src/components/game/WordHuntScreen.tsx and frontend/src/components/game/GameControls.tsx)"
-      ]
-    },
-    {
-      "description": "Puzzle/word-hunt logic changes: new/changed word list, generator placement logic details, selection utilities changes.",
-      "reason": "Not requested by REQ-40 and falls under non-goals (new gameplay features/changes unrelated to APK packaging).",
-      "evidence": [
-        "frontend-file-summaries.txt (entries for frontend/src/lib/wordhunt/words.ts, frontend/src/lib/wordhunt/generator.ts, frontend/src/lib/wordhunt/selection.ts)"
-      ]
-    },
-    {
-      "description": "UI redesign/theme changes across multiple components (letter grid styling, word list badges, global styles, Tailwind config changes).",
-      "reason": "Not requested; REQ-40 focuses on APK packaging/publishing and a visible download control, and the non-goals disallow unrelated UI redesign.",
-      "evidence": [
-        "frontend-file-summaries.txt (entries for frontend/src/components/game/LetterGrid.tsx, frontend/src/components/game/WordList.tsx, frontend/src/index.css, frontend/tailwind.config.js)"
-      ]
-    },
-    {
-      "description": "New/expanded PWA metadata and manifest changes (installability metadata, manifest.webmanifest).",
-      "reason": "Not requested by REQ-40 and constitutes additional product work beyond APK packaging/publishing.",
-      "evidence": [
-        "frontend-file-summaries.txt (entries for frontend/index.html, frontend/public/manifest.webmanifest)"
-      ]
-    },
-    {
-      "description": "Added difficulty selector and duration parsing/clamping utilities.",
-      "reason": "Not requested by REQ-40; these are new gameplay/configuration features unrelated to APK packaging/publishing.",
-      "evidence": [
-        "frontend-file-summaries.txt (entries for frontend/src/components/game/DifficultySelector.tsx, frontend/src/lib/wordhunt/duration.ts)"
-      ]
-    },
-    {
-      "description": "Capacitor configuration changes (app ID/name/etc.).",
-      "reason": "Not requested by REQ-40 (which only constrains using the existing Capacitor+Gradle project); the diff summary indicates modifications without showing they are necessary for publishing the APK at the required URL.",
-      "evidence": [
-        "frontend-file-summaries.txt (entry for frontend/capacitor.config.ts)"
-      ]
-    },
-    {
-      "description": "Added extensive Android APK build documentation (ANDROID_APK.md).",
-      "reason": "Documentation was not requested as part of REQ-40; while potentially helpful, it is additional scope beyond generating/publishing the APK.",
-      "evidence": [
-        "frontend-file-summaries.txt (entry for frontend/ANDROID_APK.md)"
-      ]
-    }
-  ],
-  "confidence": 0.62,
+  "hallucinated_features": [],
+  "confidence": 0.56,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/public/downloads/.gitkeep",
     "frontend/scripts/build-android-apk.sh",
+    "frontend/src/components/game/WordHuntScreen.tsx",
     "project_state.json"
   ]
 }

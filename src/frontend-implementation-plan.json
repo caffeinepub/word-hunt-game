@@ -1,34 +1,52 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Publish latest Android APK at /downloads/word-hunt-latest.apk",
+  "title": "Ensure latest Android APK is published as a static asset at /downloads/word-hunt-latest.apk and reflected in-app",
   "requirements": [
     {
-      "id": "REQ-40",
-      "summary": "Ensure the one-command Android APK build produces a deterministic artifact and publishes a copy that the deployed web app serves at /downloads/word-hunt-latest.apk, with the in-app Download APK control visible when available.",
+      "id": "REQ-41",
+      "summary": "Update the one-command Android APK build script to publish the newly built APK into the deployed static asset paths so it is served at /downloads/word-hunt-latest.apk.",
       "acceptanceCriteria": [
-        "Running `frontend/scripts/build-android-apk.sh` completes successfully for the intended build type (debug by default).",
-        "A deterministic APK artifact exists under `frontend/android-apk-output/` (e.g., `word-hunt-debug.apk` for debug builds).",
-        "A published copy exists at `frontend/dist/downloads/word-hunt-latest.apk` after the build completes.",
-        "A published copy exists at `frontend/public/downloads/word-hunt-latest.apk` so future web builds include the latest APK.",
-        "When the deployed site is updated with the new build output, requesting `GET /downloads/word-hunt-latest.apk` returns `200 OK` (or `206 Partial Content` when requested with a Range header).",
-        "In the app UI header, the download control labeled in English (“Download APK” / “APK”) becomes visible (i.e., the runtime APK availability check succeeds)."
+        "After running `frontend/scripts/build-android-apk.sh`, the file `frontend/dist/downloads/word-hunt-latest.apk` exists.",
+        "The published APK filename in the web build output is exactly `word-hunt-latest.apk` under the `downloads/` directory.",
+        "If the project’s deployment serves static assets from `frontend/public/`, then `frontend/public/downloads/word-hunt-latest.apk` is also created/updated to match the newly built APK.",
+        "The resulting deployed site serves the APK at the URL path `/downloads/word-hunt-latest.apk` (HTTP 200 or 206 for ranged requests)."
       ],
       "file_operations": [
         {
           "path": "frontend/scripts/build-android-apk.sh",
           "operation": "modify",
-          "description": "Harden the existing one-command APK build/publish flow to reliably (1) produce the deterministic artifact under `frontend/android-apk-output/` and (2) publish/overwrite `word-hunt-latest.apk` into BOTH `frontend/dist/downloads/` (for immediate deployment) and `frontend/public/downloads/` (to be included in future web builds), with clear failure messages if either publish step fails."
-        },
+          "description": "Harden and standardize the APK publish step so the newly built APK is copied to `frontend/dist/downloads/word-hunt-latest.apk` every run, and also kept in sync at `frontend/public/downloads/word-hunt-latest.apk` when `frontend/public/` is used by the deployment pipeline (ensure directories exist, copy overwrites deterministically, and use the exact filename `word-hunt-latest.apk`)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-42",
+      "summary": "Add a fail-fast verification step at the end of the APK build script that validates the published APK files exist and are non-empty, with clear English success/failure messages.",
+      "acceptanceCriteria": [
+        "If `frontend/dist/downloads/word-hunt-latest.apk` is missing (or zero bytes), the script exits non-zero and prints an English error message that includes the expected path(s).",
+        "If the publish step succeeds, the script prints an English success message that includes the final published path `frontend/dist/downloads/word-hunt-latest.apk` and the corresponding URL path `/downloads/word-hunt-latest.apk`."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/public/downloads/.gitkeep",
+          "path": "frontend/scripts/build-android-apk.sh",
           "operation": "modify",
-          "description": "Keep the public downloads directory tracked and update/confirm directory notes (if any) so `frontend/public/downloads/` remains present for bundling `word-hunt-latest.apk` into future builds."
-        },
+          "description": "Add a final verification block after publishing that checks (1) `frontend/dist/downloads/word-hunt-latest.apk` exists and has size > 0, and (2) if publishing/syncing to `frontend/public/downloads/word-hunt-latest.apk` is applicable, that it also exists and has size > 0; on failure, exit non-zero with an English error message listing the expected path(s) and what to check; on success, print an English success message including `frontend/dist/downloads/word-hunt-latest.apk` and URL path `/downloads/word-hunt-latest.apk`."
+        }
+      ]
+    },
+    {
+      "id": "REQ-43",
+      "summary": "Ensure the Word Hunt screen automatically shows the Download APK control once /downloads/word-hunt-latest.apk becomes available.",
+      "acceptanceCriteria": [
+        "When `/downloads/word-hunt-latest.apk` is available on the deployed site, the Word Hunt header displays the download button labeled in English (\"Download APK\" on larger screens, \"APK\" on small screens).",
+        "When `/downloads/word-hunt-latest.apk` is not available, the download button is not shown."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/game/WordHuntScreen.tsx",
           "operation": "modify",
-          "description": "Ensure the runtime APK availability check remains robust for static hosting (HEAD fallback to Range GET) and that the header shows the English-labeled download control (“Download APK” / “APK”) when `/downloads/word-hunt-latest.apk` is available. Verify the component's usage instructions before implementing."
+          "description": "Update the APK availability check so it can transition from unavailable to available without manual client-side steps (e.g., poll periodically until available and/or re-check on tab visibility/focus), while keeping the button hidden when not available and showing the existing English labels (\"Download APK\" / \"APK\") when available."
         }
       ]
     }

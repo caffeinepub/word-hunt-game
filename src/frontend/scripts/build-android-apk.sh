@@ -507,91 +507,120 @@ echo "🌐 Publishing APK to web download directories..."
 DIST_DOWNLOADS_DIR="$FRONTEND_DIR/dist/downloads"
 mkdir -p "$DIST_DOWNLOADS_DIR"
 
-if [ ! -d "$DIST_DOWNLOADS_DIR" ]; then
-  echo ""
-  echo "❌ ERROR: Failed to create dist downloads directory."
-  echo ""
-  echo "Target: $DIST_DOWNLOADS_DIR"
-  echo ""
-  exit 1
-fi
-
 # Ensure the public downloads directory exists
 PUBLIC_DOWNLOADS_DIR="$FRONTEND_DIR/public/downloads"
 mkdir -p "$PUBLIC_DOWNLOADS_DIR"
 
-if [ ! -d "$PUBLIC_DOWNLOADS_DIR" ]; then
-  echo ""
-  echo "❌ ERROR: Failed to create public downloads directory."
-  echo ""
-  echo "Target: $PUBLIC_DOWNLOADS_DIR"
-  echo ""
-  exit 1
-fi
-
-# Define the published APK name
+# Define the published APK filename (always word-hunt-latest.apk)
 PUBLISHED_APK_NAME="word-hunt-latest.apk"
 DIST_PUBLISHED_APK="$DIST_DOWNLOADS_DIR/$PUBLISHED_APK_NAME"
 PUBLIC_PUBLISHED_APK="$PUBLIC_DOWNLOADS_DIR/$PUBLISHED_APK_NAME"
 
-# Copy to dist/downloads (for immediate deployment)
-echo "📋 Publishing to dist/downloads (immediate deployment)..."
+# Copy the APK to dist/downloads/ (for immediate deployment)
 cp "$OUTPUT_APK" "$DIST_PUBLISHED_APK"
 
-if [ ! -f "$DIST_PUBLISHED_APK" ]; then
-  echo ""
-  echo "❌ ERROR: Failed to publish APK to dist downloads directory."
-  echo ""
-  echo "Source: $OUTPUT_APK"
-  echo "Target: $DIST_PUBLISHED_APK"
-  echo ""
-  echo "This APK is required for the deployed web app to serve at /downloads/word-hunt-latest.apk"
-  echo ""
-  exit 1
-fi
-
-echo "✅ Published to: $DIST_PUBLISHED_APK"
-
-# Copy to public/downloads (for future web builds)
-echo "📋 Publishing to public/downloads (future web builds)..."
+# Copy the APK to public/downloads/ (for future web builds)
 cp "$OUTPUT_APK" "$PUBLIC_PUBLISHED_APK"
 
-if [ ! -f "$PUBLIC_PUBLISHED_APK" ]; then
+echo "✅ APK published to web download directories"
+echo ""
+
+# ============================================================================
+# Step 7: Verify Published APK Files
+# ============================================================================
+echo "🔍 Verifying published APK files..."
+
+VERIFICATION_FAILED=false
+MISSING_FILES=()
+
+# Check dist/downloads/word-hunt-latest.apk
+if [ ! -f "$DIST_PUBLISHED_APK" ]; then
+  VERIFICATION_FAILED=true
+  MISSING_FILES+=("$DIST_PUBLISHED_APK")
+elif [ ! -s "$DIST_PUBLISHED_APK" ]; then
   echo ""
-  echo "❌ ERROR: Failed to publish APK to public downloads directory."
+  echo "❌ ERROR: Published APK file exists but is empty (zero bytes)."
   echo ""
-  echo "Source: $OUTPUT_APK"
-  echo "Target: $PUBLIC_PUBLISHED_APK"
+  echo "File: $DIST_PUBLISHED_APK"
   echo ""
-  echo "This APK is required for future web builds to include the latest APK."
+  echo "This indicates a problem during the copy operation."
+  echo "Please check:"
+  echo "  1. Disk space is available"
+  echo "  2. Write permissions for the target directory"
+  echo "  3. The source APK file is valid and non-empty"
   echo ""
   exit 1
 fi
 
-echo "✅ Published to: $PUBLIC_PUBLISHED_APK"
+# Check public/downloads/word-hunt-latest.apk
+if [ ! -f "$PUBLIC_PUBLISHED_APK" ]; then
+  VERIFICATION_FAILED=true
+  MISSING_FILES+=("$PUBLIC_PUBLISHED_APK")
+elif [ ! -s "$PUBLIC_PUBLISHED_APK" ]; then
+  echo ""
+  echo "❌ ERROR: Published APK file exists but is empty (zero bytes)."
+  echo ""
+  echo "File: $PUBLIC_PUBLISHED_APK"
+  echo ""
+  echo "This indicates a problem during the copy operation."
+  echo "Please check:"
+  echo "  1. Disk space is available"
+  echo "  2. Write permissions for the target directory"
+  echo "  3. The source APK file is valid and non-empty"
+  echo ""
+  exit 1
+fi
+
+# If any files are missing, fail with clear error message
+if [ "$VERIFICATION_FAILED" = true ]; then
+  echo ""
+  echo "❌ ERROR: APK publish verification failed - required files are missing."
+  echo ""
+  echo "Missing files:"
+  for file in "${MISSING_FILES[@]}"; do
+    echo "  - $file"
+  done
+  echo ""
+  echo "Expected published APK locations:"
+  echo "  1. $DIST_PUBLISHED_APK (for immediate deployment)"
+  echo "  2. $PUBLIC_PUBLISHED_APK (for future web builds)"
+  echo ""
+  echo "Please check:"
+  echo "  1. The copy operations completed successfully"
+  echo "  2. Write permissions for both target directories"
+  echo "  3. Disk space is available"
+  echo ""
+  exit 1
+fi
+
+echo "✅ All published APK files verified successfully"
 echo ""
 
 # ============================================================================
 # Success Summary
 # ============================================================================
-echo "🎉 Build and publish completed successfully!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🎉 APK Build and Publish Complete!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "📍 Deterministic APK output:"
+echo "📦 Build Output:"
 echo "   $OUTPUT_APK"
 echo ""
-echo "🌐 Published web downloads:"
-echo "   Immediate deployment: $DIST_PUBLISHED_APK"
-echo "   Future web builds:    $PUBLIC_PUBLISHED_APK"
+echo "🌐 Published Web Downloads:"
+echo "   • $DIST_PUBLISHED_APK"
+echo "   • $PUBLIC_PUBLISHED_APK"
 echo ""
-echo "📱 Runtime download URL: /downloads/word-hunt-latest.apk"
+echo "🔗 Runtime URL Path:"
+echo "   /downloads/$PUBLISHED_APK_NAME"
 echo ""
-echo "Next steps:"
-echo "  1. Deploy the updated frontend/dist directory to your web host"
-echo "  2. The APK will be available at: https://your-domain.com/downloads/word-hunt-latest.apk"
-echo "  3. The in-app Download APK button will automatically appear when the APK is detected"
+echo "📱 Installation:"
+if [ "$BUILD_TYPE" = "debug" ]; then
+  echo "   Debug APK - Install directly on your device for testing"
+elif [ "$ENABLE_SIGNING" = true ]; then
+  echo "   Signed Release APK - Ready for distribution"
+else
+  echo "   Unsigned Release APK - Sign before distribution"
+  echo "   To build a signed APK: ./build-android-apk.sh --release --signed"
+fi
 echo ""
-echo "To install the APK on an Android device:"
-echo "  1. Enable 'Install from Unknown Sources' in Android settings"
-echo "  2. Download the APK from the web app or transfer it directly"
-echo "  3. Open the APK file to install"
-echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

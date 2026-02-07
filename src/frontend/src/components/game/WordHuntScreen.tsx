@@ -9,6 +9,7 @@ import { getDefaultDuration, secondsToDuration, validateDuration } from '../../l
 import { Button } from '../ui/button';
 
 const GRID_SIZE = 15;
+const APK_CHECK_INTERVAL = 10000; // Check every 10 seconds
 
 export function WordHuntScreen() {
   const [logoError, setLogoError] = useState(false);
@@ -21,7 +22,7 @@ export function WordHuntScreen() {
     return secondsToDuration(defaultDuration);
   });
 
-  // Check if APK is available with robust fallback
+  // Check if APK is available with robust fallback and periodic re-checking
   useEffect(() => {
     const checkApkAvailability = async () => {
       try {
@@ -51,8 +52,30 @@ export function WordHuntScreen() {
       }
     };
     
+    // Initial check
     checkApkAvailability();
-  }, []);
+    
+    // Set up periodic checking (only if not yet available)
+    const intervalId = setInterval(() => {
+      if (apkAvailable !== true) {
+        checkApkAvailability();
+      }
+    }, APK_CHECK_INTERVAL);
+    
+    // Also check when tab becomes visible (user returns to the app)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && apkAvailable !== true) {
+        checkApkAvailability();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [apkAvailable]);
 
   const handleNewGame = () => {
     const validatedSeconds = validateDuration(nextGameDuration.minutes, nextGameDuration.seconds);
@@ -92,7 +115,7 @@ export function WordHuntScreen() {
               </div>
             </div>
             
-            {/* Download APK Button */}
+            {/* Download APK Button - only show when available */}
             {apkAvailable === true && (
               <Button
                 onClick={handleDownloadApk}
@@ -104,12 +127,6 @@ export function WordHuntScreen() {
                 <span className="hidden sm:inline">Download APK</span>
                 <span className="sm:hidden">APK</span>
               </Button>
-            )}
-            
-            {apkAvailable === false && (
-              <div className="text-xs text-blue-100 hidden md:block">
-                APK not available
-              </div>
             )}
           </div>
         </div>
