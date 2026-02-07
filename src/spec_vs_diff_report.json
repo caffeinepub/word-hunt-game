@@ -1,0 +1,37 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-07T07:07:52.254Z",
+  "summary": "BuildRequest specified no requirements and explicitly called for no additional changes. The diff introduces new frontend and backend functionality (URL/session param utilities, admin token handling in actor creation, and a user-approval/access-control system in the Motoko backend), including modifications to files that were declared immutable and backend logic that was declared a non-goal.",
+  "missing_requirements": [],
+  "hallucinated_features": [
+    {
+      "description": "Added URL parameter/sessionStorage utilities for extracting and persisting URL parameters (including hash/query parsing and clearing params from hash).",
+      "reason": "No new features were requested; BuildRequest states 'no additional changes requested' and 'Requirements: none'.",
+      "evidence": [
+        "frontend/src/utils/urlParams.ts"
+      ]
+    },
+    {
+      "description": "Changed actor initialization to read a secret/admin token from URL parameters and call backend initialization with that secret; added query invalidation/refetch behavior tied to actor changes.",
+      "reason": "No new features were requested; additionally this modifies an immutable frontend path per constraints.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "Introduced/expanded backend user-approval and access-control endpoints and added profile storage gated by approval/admin checks (e.g., isCallerApproved, requestApproval, setApproval, listApprovals, save/get profiles, role queries/assignment).",
+      "reason": "No new features were requested; additionally, backend changes were explicitly a non-goal ('Backend changes ... must not require Motoko/backend changes'), yet backend/main.mo was modified.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.86,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/utils/urlParams.ts",
+    "project_state.json"
+  ]
+}

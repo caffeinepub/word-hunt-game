@@ -1,0 +1,303 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 29,
+  "summary": "Build a free Android mobile app titled \"Word Hunt Game\" featuring a word-hunt puzzle using a provided list of car-related words.",
+  "architectural_notes": [
+    "Remove difficulty selector/levels (Easy/Normal/Hard) from UI and puzzle generation parameters.",
+    "Timer behavior change: use a countdown timer (not elapsed); clarify/define countdown duration and what occurs when it reaches 0.",
+    "Define and implement a configurable countdown duration (UI control + default value; decide whether to persist between sessions).",
+    "Proceed with generating an Android-ready APK package (Android packaging step is now underway).",
+    "User approved proceeding with generating the installable Android APK; APK build process started.",
+    "Deployment completed successfully (Version 12 ready to preview).",
+    "User confirmed to proceed with generating the installable Android APK; APK build started.",
+    "User confirmed everything looks right and approved proceeding with the final APK build; build started (Version 13)."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-the-main-game-screen-for-a-mobile-friendly-web-app-titled-word-hunt-game-that-plays-as-a-word-hunt-word-search-puzzle",
+      "title": "Create the main game screen for a mobile-friendly web app titled \"Word Hunt Game\" that plays as a word-hunt/word-search puzzle.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-word-hunt-puzzle-mechanic-generate-a-letter-grid-that-hides-words-from-the-provided-list-and-allows-the-player-to-find-them-by-dragging-touch-selecting-contiguous-letters-in-a-straight-line-horizontal-vertical-or-diagonal-forward-or-backward",
+      "title": "Implement a word-hunt puzzle mechanic: generate a letter grid that hides words from the provided list and allows the player to find them by dragging/touch-selecting contiguous letters in a straight line (horizontal, vertical, or diagonal; forward or backward).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-include-and-use-exactly-the-following-hunt-word-list-uppercase-as-the-source-of-words-to-place-and-find-fluids-chemicals-battery-wiper-shockabsorber-alternator-wheelbearing-drivebelt-timingbelt-cvjointboot-brakelightbulb-headlightbulb-interiorbulb-licenseplatebulb-parklightbulb-thirdbrakelightbulb-ignitioncoil-compressor-cvjoint-driveshaft-rackend-tierodend-evaporator-airfilter-cabinairfilter-fuelfilter-oilfilter-pollenfilter-transmissionfilter-camshaftcovergasket-balljoint-taillightlamp-stabilizerlink-pagoil-brakepads-sparkplug-drivebeltidlerpulley-waterpump-radiator-brakerotor-oilpandrainplugseal-brakeshoe-starter-drivebelttensioner-timingbeltset",
+      "title": "Include and use exactly the following hunt word list (uppercase) as the source of words to place and find: FLUIDS, CHEMICALS, BATTERY, WIPER, SHOCKABSORBER, ALTERNATOR, WHEELBEARING, DRIVEBELT, TIMINGBELT, CVJOINTBOOT, BRAKELIGHTBULB, HEADLIGHTBULB, INTERIORBULB, LICENSEPLATEBULB, PARKLIGHTBULB, THIRDBRAKELIGHTBULB, IGNITIONCOIL, COMPRESSOR, CVJOINT, DRIVESHAFT, RACKEND, TIERODEND, EVAPORATOR, AIRFILTER, CABINAIRFILTER, FUELFILTER, OILFILTER, POLLENFILTER, TRANSMISSIONFILTER, CAMSHAFTCOVERGASKET, BALLJOINT, TAILLIGHTLAMP, STABILIZERLINK, PAGOIL, BRAKEPADS, SPARKPLUG, DRIVEBELTIDLERPULLEY, WATERPUMP, RADIATOR, BRAKEROTOR, OILPANDRAINPLUGSEAL, BRAKESHOE, STARTER, DRIVEBELTTENSIONER, TIMINGBELTSET.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-basic-game-controls-new-game-to-regenerate-a-fresh-puzzle-and-a-visible-counter-progress-indicator-showing-how-many-words-are-found-out-of-total",
+      "title": "Provide basic game controls: \"New Game\" to regenerate a fresh puzzle and a visible counter/progress indicator showing how many words are found out of total.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-choose-and-apply-a-coherent-visual-theme-for-a-word-hunt-game-colors-typography-spacing-and-component-styling-and-enforce-it-consistently-across-all-screens",
+      "title": "Choose and apply a coherent visual theme for a word-hunt game (colors, typography, spacing, and component styling) and enforce it consistently across all screens.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-user-uploaded-image-as-the-app-logo-by-rendering-it-in-the-top-header-of-the-word-hunt-game-screen-alongside-the-word-hunt-game-title-in-a-way-that-remains-mobile-friendly-and-does-not-disrupt-the-existing-header-layout",
+      "title": "Add the user-uploaded image as the app logo by rendering it in the top header of the Word Hunt Game screen (alongside the \"Word Hunt Game\" title) in a way that remains mobile-friendly and does not disrupt the existing header layout.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-store-the-selected-logo-image-in-the-frontend-public-static-assets-and-reference-it-consistently-from-the-header-use-a-stable-path-under-frontend-public-assets",
+      "title": "Store the selected logo image in the frontend public static assets and reference it consistently from the header (use a stable path under frontend/public/assets/).",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-word-hunt-game-ui-to-use-a-blue-color-theme-consistently-across-the-app-replacing-the-current-amber-orange-accents-in-global-theme-tokens-and-in-component-level-gradient-accent-classes-header-buttons-progress-bar-selected-cell-highlight-badges-and-links",
+      "title": "Update the Word Hunt Game UI to use a blue color theme consistently across the app, replacing the current amber/orange accents in global theme tokens and in component-level gradient/accent classes (header, buttons, progress bar, selected-cell highlight, badges, and links).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-in-game-timer-that-tracks-and-displays-the-elapsed-time-for-the-current-puzzle-game-session-resetting-when-the-player-starts-a-new-game",
+      "title": "Add an in-game timer that tracks and displays the elapsed time for the current puzzle/game session, resetting when the player starts a new game.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-difficulty-selector-with-three-levels-easy-normal-hard-and-use-the-selected-difficulty-to-generate-puzzles-with-different-gameplay-parameters-at-minimum-grid-size",
+      "title": "Add a difficulty selector with three levels (Easy, Normal, Hard) and use the selected difficulty to generate puzzles with different gameplay parameters (at minimum, grid size).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-difficulty-selector-feature-easy-normal-hard-from-the-word-hunt-game-ui-and-gameplay-so-the-puzzle-always-uses-a-single-default-grid-size",
+      "title": "Remove the difficulty selector feature (Easy / Normal / Hard) from the Word Hunt Game UI and gameplay so the puzzle always uses a single default grid size.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-change-the-in-game-timer-from-counting-up-elapsed-time-to-counting-down-remaining-time-for-each-puzzle-session-resetting-to-a-fixed-start-duration-whenever-the-player-starts-a-new-game",
+      "title": "Change the in-game timer from counting up (elapsed time) to counting down (remaining time) for each puzzle session, resetting to a fixed start duration whenever the player starts a new game.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-mobile-friendly-ui-control-that-lets-the-player-set-the-countdown-timer-duration-the-starting-time-for-each-puzzle-before-starting-a-new-game",
+      "title": "Add a mobile-friendly UI control that lets the player set the countdown timer duration (the starting time for each puzzle) before starting a new game.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-word-hunt-game-state-timer-logic-so-the-countdown-start-duration-is-configurable-based-on-the-player-s-selected-value-and-the-timer-resets-to-that-selected-duration-whenever-a-new-puzzle-starts",
+      "title": "Update the Word Hunt game state/timer logic so the countdown start duration is configurable based on the player’s selected value, and the timer resets to that selected duration whenever a new puzzle starts.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-pwa-support-to-the-existing-word-hunt-game-web-app-so-it-can-be-installed-and-used-as-the-basis-for-an-android-apk-build-web-app-manifest-app-icons-and-required-html-metadata",
+      "title": "Add PWA support to the existing Word Hunt Game web app so it can be installed and used as the basis for an Android APK build (web app manifest, app icons, and required HTML metadata).",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-repository-documentation-that-explains-how-to-produce-an-installable-android-apk-from-the-existing-app-build-output-including-prerequisites-and-step-by-step-commands-without-requiring-any-changes-to-the-motoko-backend",
+      "title": "Provide repository documentation that explains how to produce an installable Android APK from the existing app build output (including prerequisites and step-by-step commands), without requiring any changes to the Motoko backend.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-and-complete-the-existing-android-apk-packaging-documentation-so-a-developer-can-reliably-produce-an-installable-android-apk-for-the-current-word-hunt-game-pwa-build-output-using-either-bubblewrap-twa-or-capacitor-without-requiring-any-motoko-backend-changes",
+      "title": "Update and complete the existing Android APK packaging documentation so a developer can reliably produce an installable Android APK for the current Word Hunt Game PWA build output, using either Bubblewrap TWA or Capacitor, without requiring any Motoko/backend changes.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-committed-android-packaging-project-using-capacitor-in-the-repo-so-a-developer-can-build-an-installable-android-apk-for-the-current-word-hunt-game-pwa-without-changing-the-motoko-backend",
+      "title": "Add a committed Android packaging project (using Capacitor) in the repo so a developer can build an installable Android APK for the current Word Hunt Game PWA without changing the Motoko backend.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-android-apk-documentation-to-include-the-exact-repo-specific-commands-for-building-the-apk-from-this-repository-after-the-capacitor-android-project-is-added-including-where-to-find-the-generated-apk-outputs",
+      "title": "Update the existing Android APK documentation to include the exact repo-specific commands for building the APK from this repository after the Capacitor Android project is added (including where to find the generated APK outputs).",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-repository-script-command-that-performs-an-end-to-end-android-apk-build-using-the-existing-capacitor-android-project-producing-an-installable-apk-artifact-without-any-motoko-backend-changes",
+      "title": "Add a repository script/command that performs an end-to-end Android APK build using the existing Capacitor Android project, producing an installable APK artifact without any Motoko/backend changes.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-android-apk-md-to-include-the-exact-one-command-build-invocation-added-in-req-20-and-explicitly-state-the-expected-apk-output-path-s",
+      "title": "Update `frontend/ANDROID_APK.md` to include the exact one-command build invocation added in REQ-20 and explicitly state the expected APK output path(s).",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-to-produce-a-clearly-named-stable-output-artifact-by-copying-the-generated-debug-apk-into-a-deterministic-folder-in-the-repo-e-g-frontend-android-apk-output-after-a-successful-build",
+      "title": "Update the existing one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to produce a clearly named, stable output artifact by copying the generated debug APK into a deterministic folder in the repo (e.g., `frontend/android-apk-output/`) after a successful build.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-investigate-the-current-build-deployment-failure-and-make-the-minimal-code-configuration-changes-needed-so-a-clean-build-and-deployment-completes-successfully",
+      "title": "Investigate the current build/deployment failure and make the minimal code/configuration changes needed so a clean build and deployment completes successfully.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-one-command-android-apk-build-script-to-validate-that-the-installed-java-version-meets-the-android-project-requirement-java-17-and-fail-fast-with-a-clear-english-error-message-when-it-does-not",
+      "title": "Update the one-command Android APK build script to validate that the installed Java version meets the Android project requirement (Java 17), and fail fast with a clear English error message when it does not.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-android-apk-documentation-to-reflect-the-java-17-requirement-consistently-with-the-android-project-gradle-configuration",
+      "title": "Update the Android APK documentation to reflect the Java 17 requirement consistently with the Android project Gradle configuration.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-one-command-android-apk-build-script-frontend-scripts-build-android-apk-sh-to-produce-a-deterministic-clearly-named-apk-artifact-by-copying-the-generated-debug-apk-into-a-stable-repo-folder-e-g-frontend-android-apk-output-after-a-successful-build",
+      "title": "Update the one-command Android APK build script (`frontend/scripts/build-android-apk.sh`) to produce a deterministic, clearly named APK artifact by copying the generated debug APK into a stable repo folder (e.g., `frontend/android-apk-output/`) after a successful build.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Create a free Android mobile app titled \"Word Hunt Game\".",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Implement a word-hunt puzzle game mechanic using the provided car-related word list.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Include and use the provided word list (e.g., FLUIDS, CHEMICALS, BATTERY, WIPER, ... TIMINGBELTSET) as the hunt words in the game.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add a logo to the app (use the user-provided image as the logo in the UI/app icon as appropriate).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Switch the app UI to a blue color theme and apply it consistently across the app.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add an in-game timer to track elapsed time (per puzzle/game session).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Change the in-game timer from counting up (elapsed time) to counting down (countdown timer).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Allow the player to set/configure the game timer duration (countdown start time) for a puzzle session.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Provide an Android APK build/release output for the Word Hunt Game (packaging the app as an installable APK).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Update `frontend/ANDROID_APK.md` to document the stable APK artifact output location produced by the one-command script (in addition to any Gradle output paths already listed).",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Update `frontend/ANDROID_APK.md` to document the exact one-command APK build invocation and explicitly list the deterministic APK output path produced by the script (in addition to any Gradle output paths).",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "2d",
+  "projectName": "Word Hunt Game",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

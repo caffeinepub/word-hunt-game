@@ -1,0 +1,30 @@
+{
+  "kind": "build_request",
+  "title": "User approval to proceed (no additional changes requested)",
+  "priority": "normal",
+  "requirements": [],
+  "constraints": [
+    "Do not modify any frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Respect the existing single-actor Motoko backend architecture; keep backend logic in backend/main.mo.",
+    "Use English for any user-facing text."
+  ],
+  "nonGoals": [
+    "Adding new gameplay features or changing the Word Hunt rules/mechanics.",
+    "Changing Android packaging approach or build outputs beyond what is already implemented in the repository scripts and docs.",
+    "Backend changes (the Android packaging flow must not require Motoko/backend changes)."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

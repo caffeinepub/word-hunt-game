@@ -1,0 +1,7 @@
+# Ignore all APK artifacts in this directory
+*.apk
+*.aab
+
+# Ignore any build logs or temporary files
+*.log
+*.tmp
